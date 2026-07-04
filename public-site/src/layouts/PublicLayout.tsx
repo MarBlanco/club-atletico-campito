@@ -1,8 +1,10 @@
-import type { PropsWithChildren } from 'react'
+import { Outlet } from 'react-router-dom'
 
-function PublicLayout({ children }: PropsWithChildren) {
+function PublicLayout() {
   return (
-    <main>{children}</main>
+    <main>
+      <Outlet />
+    </main>
   )
 }
 

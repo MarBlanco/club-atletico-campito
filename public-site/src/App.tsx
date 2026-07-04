@@ -1,11 +1,8 @@
-import PublicLayout from './layouts/PublicLayout'
+import { RouterProvider } from 'react-router-dom'
+import router from './routes/router'
 
 function App() {
-  return (
-    <PublicLayout>
-      <div>Club Atlético Campito</div>
-    </PublicLayout>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
