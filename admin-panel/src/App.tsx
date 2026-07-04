@@ -1,6 +1,10 @@
+import AdminLayout from './layouts/AdminLayout'
+
 function App() {
   return (
-    <div>Club Atlético Campito</div>
+    <AdminLayout>
+      <div>Club Atlético Campito</div>
+    </AdminLayout>
   )
 }
 

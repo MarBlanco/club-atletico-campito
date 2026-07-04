@@ -1,6 +1,10 @@
+import PublicLayout from './layouts/PublicLayout'
+
 function App() {
   return (
-    <div>Club Atlético Campito</div>
+    <PublicLayout>
+      <div>Club Atlético Campito</div>
+    </PublicLayout>
   )
 }
 
