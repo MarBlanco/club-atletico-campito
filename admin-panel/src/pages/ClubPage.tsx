@@ -164,7 +164,7 @@ function ClubPage() {
             </div>
           </Field>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
+            <button type="submit" disabled={saving || uploading} style={btnStyle('#1a1a2e')}>
               {saving ? 'Guardando...' : 'Guardar'}
             </button>
           </div>
