@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { News } from '../types/news'
 import type { Match } from '../types/matches'
+import type { Club } from '../types/club'
 import { getLatestNews } from '../services/newsService'
 import { getNextMatch } from '../services/matchesService'
+import { getClub } from '../services/clubService'
 
 function HomePage() {
   const [news, setNews] = useState<News[]>([])
@@ -12,6 +14,10 @@ function HomePage() {
   const [nextMatch, setNextMatch] = useState<Match | null>(null)
   const [matchLoading, setMatchLoading] = useState(true)
   const [matchError, setMatchError] = useState<string | null>(null)
+
+  const [club, setClub] = useState<Club | null>(null)
+  const [clubLoading, setClubLoading] = useState(true)
+  const [clubError, setClubError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -53,6 +59,29 @@ function HomePage() {
       })
       .finally(() => {
         if (!cancelled) setMatchLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getClub()
+      .then(data => {
+        if (!cancelled) {
+          setClub(data)
+          setClubError(null)
+        }
+      })
+      .catch(e => {
+        if (!cancelled) {
+          setClubError(e instanceof Error ? e.message : 'Error al cargar club')
+          setClub(null)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setClubLoading(false)
       })
     return () => {
       cancelled = true
@@ -237,6 +266,62 @@ function HomePage() {
       fontWeight: 500,
       color: '#111111',
     } as React.CSSProperties,
+
+    clubCard: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: 8,
+      padding: 28,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 20,
+    } as React.CSSProperties,
+
+    clubHead: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16,
+    } as React.CSSProperties,
+
+    clubLogo: {
+      width: 64,
+      height: 64,
+      objectFit: 'contain' as const,
+      borderRadius: 8,
+      flexShrink: 0,
+    } as React.CSSProperties,
+
+    clubLocation: {
+      fontSize: 13,
+      color: '#1EB9E8',
+      fontWeight: 600,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.5,
+      margin: 0,
+    } as React.CSSProperties,
+
+    clubBlock: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 4,
+    } as React.CSSProperties,
+
+    clubBlockLabel: {
+      fontSize: 11,
+      fontWeight: 700,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      color: '#123A9E',
+      margin: 0,
+    } as React.CSSProperties,
+
+    clubBlockText: {
+      fontSize: 14,
+      lineHeight: 1.6,
+      color: '#374151',
+      margin: 0,
+      whiteSpace: 'pre-line' as const,
+    } as React.CSSProperties,
   }
 
   function formatDate(iso: string) {
@@ -257,10 +342,6 @@ function HomePage() {
 
   const staticSections = [
     {
-      title: 'Club',
-      items: ['Identidad', 'Historia'],
-    },
-    {
       title: 'Equipos',
       items: ['Primera', 'Infanto Juvenil'],
     },
@@ -277,6 +358,51 @@ function HomePage() {
         <p style={styles.heroSubtitle}>
           Colón, Entre Ríos · Argentina
         </p>
+      </section>
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Club</h2>
+        <div style={styles.grid}>
+          {clubLoading ? (
+            <p style={styles.status}>Cargando club...</p>
+          ) : clubError ? (
+            <p style={styles.status}>{clubError}</p>
+          ) : !club ? (
+            <div style={styles.placeholderCard}>
+              <span style={styles.placeholderLabel}>Club</span>
+              <p style={styles.placeholderText}>Identidad</p>
+            </div>
+          ) : (
+            <article style={styles.clubCard}>
+              <div style={styles.clubHead}>
+                {club.logo_url && (
+                  <img
+                    src={club.logo_url}
+                    alt="Escudo Club Atlético Campito"
+                    style={styles.clubLogo}
+                  />
+                )}
+                <p style={styles.clubLocation}>{club.location}</p>
+              </div>
+              <div style={styles.clubBlock}>
+                <p style={styles.clubBlockLabel}>Historia</p>
+                <p style={styles.clubBlockText}>{club.history}</p>
+              </div>
+              {club.mission && (
+                <div style={styles.clubBlock}>
+                  <p style={styles.clubBlockLabel}>Misión</p>
+                  <p style={styles.clubBlockText}>{club.mission}</p>
+                </div>
+              )}
+              {club.values && (
+                <div style={styles.clubBlock}>
+                  <p style={styles.clubBlockLabel}>Valores</p>
+                  <p style={styles.clubBlockText}>{club.values}</p>
+                </div>
+              )}
+            </article>
+          )}
+        </div>
       </section>
 
       <section style={styles.section}>
