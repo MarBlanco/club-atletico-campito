@@ -3,10 +3,12 @@ import type { News } from '../types/news'
 import type { Match } from '../types/matches'
 import type { Club } from '../types/club'
 import type { Media } from '../types/media'
+import type { Gallery } from '../types/galleries'
 import { getLatestNews } from '../services/newsService'
 import { getNextMatch } from '../services/matchesService'
 import { getClub } from '../services/clubService'
 import { getLatestMedia } from '../services/mediaService'
+import { getLatestGalleries } from '../services/galleriesService'
 
 function HomePage() {
   const [news, setNews] = useState<News[]>([])
@@ -24,6 +26,10 @@ function HomePage() {
   const [media, setMedia] = useState<Media[]>([])
   const [mediaLoading, setMediaLoading] = useState(true)
   const [mediaError, setMediaError] = useState<string | null>(null)
+
+  const [galleries, setGalleries] = useState<Gallery[]>([])
+  const [galleriesLoading, setGalleriesLoading] = useState(true)
+  const [galleriesError, setGalleriesError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -111,6 +117,29 @@ function HomePage() {
       })
       .finally(() => {
         if (!cancelled) setMediaLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getLatestGalleries(4)
+      .then(data => {
+        if (!cancelled) {
+          setGalleries(data)
+          setGalleriesError(null)
+        }
+      })
+      .catch(e => {
+        if (!cancelled) {
+          setGalleriesError(e instanceof Error ? e.message : 'Error al cargar momentos campito')
+          setGalleries([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setGalleriesLoading(false)
       })
     return () => {
       cancelled = true
@@ -382,6 +411,62 @@ function HomePage() {
       backgroundColor: 'rgba(18, 58, 158, 0.9)',
       color: '#ffffff',
     } as React.CSSProperties,
+
+    galleryCard: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: 8,
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      minHeight: 200,
+    } as React.CSSProperties,
+
+    galleryCover: {
+      width: '100%',
+      height: 140,
+      objectFit: 'cover' as const,
+      backgroundColor: '#f3f4f6',
+    } as React.CSSProperties,
+
+    galleryBody: {
+      padding: 14,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 4,
+    } as React.CSSProperties,
+
+    galleryCategory: {
+      fontSize: 11,
+      fontWeight: 700,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      color: '#1EB9E8',
+      margin: 0,
+    } as React.CSSProperties,
+
+    galleryTitle: {
+      fontSize: 15,
+      fontWeight: 600,
+      color: '#111111',
+      margin: 0,
+      lineHeight: 1.3,
+    } as React.CSSProperties,
+
+    galleryDate: {
+      fontSize: 12,
+      color: '#6b7280',
+      margin: 0,
+    } as React.CSSProperties,
+  }
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    primera: 'Primera',
+    infanto: 'Infanto Juvenil',
+    femenino: 'Femenino',
+    veteranos: 'Veteranos',
+    familias: 'Familias',
+    hinchas: 'Hinchas',
   }
 
   function formatDate(iso: string) {
@@ -404,10 +489,6 @@ function HomePage() {
     {
       title: 'Equipos',
       items: ['Primera', 'Infanto Juvenil'],
-    },
-    {
-      title: 'Momentos Campito',
-      items: ['Destacado reciente'],
     },
   ]
 
@@ -554,6 +635,45 @@ function HomePage() {
                   style={styles.mediaThumb}
                 />
                 <span style={styles.mediaBadge}>{item.type}</span>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Momentos Campito</h2>
+        <div style={styles.grid}>
+          {galleriesLoading ? (
+            <p style={styles.status}>Cargando momentos campito...</p>
+          ) : galleriesError ? (
+            <p style={styles.status}>{galleriesError}</p>
+          ) : galleries.length === 0 ? (
+            <div style={styles.placeholderCard}>
+              <span style={styles.placeholderLabel}>Momentos Campito</span>
+              <p style={styles.placeholderText}>Destacado reciente</p>
+            </div>
+          ) : (
+            galleries.map(g => (
+              <article key={g.id} style={styles.galleryCard}>
+                <img
+                  src={g.cover_image}
+                  alt={g.title}
+                  style={styles.galleryCover}
+                />
+                <div style={styles.galleryBody}>
+                  <p style={styles.galleryCategory}>
+                    {CATEGORY_LABELS[g.category] ?? g.category}
+                  </p>
+                  <h3 style={styles.galleryTitle}>{g.title}</h3>
+                  <p style={styles.galleryDate}>
+                    {new Date(g.match_date).toLocaleDateString('es-AR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
               </article>
             ))
           )}
