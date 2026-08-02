@@ -5,6 +5,7 @@ import ClubPage from '../pages/ClubPage'
 import TeamsPage from '../pages/TeamsPage'
 import FirstTeamPage from '../pages/FirstTeamPage'
 import NewsPage from '../pages/NewsPage'
+import NewsDetailPage from '../pages/NewsDetailPage'
 import FixturePage from '../pages/FixturePage'
 import MultimediaPage from '../pages/MultimediaPage'
 import CommunityPage from '../pages/CommunityPage'
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: '/equipos', element: <TeamsPage /> },
       { path: '/equipos/primera', element: <FirstTeamPage /> },
       { path: '/noticias', element: <NewsPage /> },
+      { path: '/noticias/:id', element: <NewsDetailPage /> },
       { path: '/fixture', element: <FixturePage /> },
       { path: '/multimedia', element: <MultimediaPage /> },
       { path: '/comunidad', element: <CommunityPage /> },

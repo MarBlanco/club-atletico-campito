@@ -25,3 +25,15 @@ export async function getPublishedNews(): Promise<News[]> {
   if (error) throw error
   return data
 }
+
+export async function getPublishedNewsById(id: string): Promise<News | null> {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .eq('id', id)
+    .eq('published', true)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
