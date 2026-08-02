@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
 import type { News } from '../types/news'
+import type { Match } from '../types/matches'
 import { getLatestNews } from '../services/newsService'
+import { getNextMatch } from '../services/matchesService'
 
 function HomePage() {
   const [news, setNews] = useState<News[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [newsLoading, setNewsLoading] = useState(true)
+  const [newsError, setNewsError] = useState<string | null>(null)
+
+  const [nextMatch, setNextMatch] = useState<Match | null>(null)
+  const [matchLoading, setMatchLoading] = useState(true)
+  const [matchError, setMatchError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -13,17 +19,40 @@ function HomePage() {
       .then(data => {
         if (!cancelled) {
           setNews(data)
-          setError(null)
+          setNewsError(null)
         }
       })
       .catch(e => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Error al cargar noticias')
+          setNewsError(e instanceof Error ? e.message : 'Error al cargar noticias')
           setNews([])
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) setNewsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getNextMatch()
+      .then(data => {
+        if (!cancelled) {
+          setNextMatch(data)
+          setMatchError(null)
+        }
+      })
+      .catch(e => {
+        if (!cancelled) {
+          setMatchError(e instanceof Error ? e.message : 'Error al cargar fixture')
+          setNextMatch(null)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setMatchLoading(false)
       })
     return () => {
       cancelled = true
@@ -151,13 +180,78 @@ function HomePage() {
       color: '#6b7280',
       fontSize: 14,
     } as React.CSSProperties,
+
+    matchCard: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderLeft: '4px solid #1EB9E8',
+      borderRadius: 8,
+      padding: 24,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 10,
+    } as React.CSSProperties,
+
+    matchLabel: {
+      fontSize: 12,
+      fontWeight: 600,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      color: '#1EB9E8',
+      margin: 0,
+    } as React.CSSProperties,
+
+    matchRival: {
+      fontSize: 22,
+      fontWeight: 700,
+      color: '#123A9E',
+      margin: 0,
+      lineHeight: 1.2,
+    } as React.CSSProperties,
+
+    matchRow: {
+      display: 'flex',
+      flexWrap: 'wrap' as const,
+      gap: 16,
+      fontSize: 14,
+      color: '#111111',
+      margin: 0,
+    } as React.CSSProperties,
+
+    matchMetaItem: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 2,
+    } as React.CSSProperties,
+
+    matchMetaLabel: {
+      fontSize: 11,
+      fontWeight: 600,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.5,
+      color: '#6b7280',
+    } as React.CSSProperties,
+
+    matchMetaValue: {
+      fontSize: 14,
+      fontWeight: 500,
+      color: '#111111',
+    } as React.CSSProperties,
   }
 
   function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString('es-AR', {
+      weekday: 'long',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+    })
+  }
+
+  function formatTime(iso: string) {
+    return new Date(iso).toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
     })
   }
 
@@ -169,10 +263,6 @@ function HomePage() {
     {
       title: 'Equipos',
       items: ['Primera', 'Infanto Juvenil'],
-    },
-    {
-      title: 'Fixture',
-      items: ['Próximo partido'],
     },
     {
       title: 'Momentos Campito',
@@ -192,10 +282,10 @@ function HomePage() {
       <section style={styles.section}>
         <h2 style={styles.sectionTitle}>Noticias</h2>
         <div style={styles.grid}>
-          {loading ? (
+          {newsLoading ? (
             <p style={styles.status}>Cargando noticias...</p>
-          ) : error ? (
-            <p style={styles.status}>{error}</p>
+          ) : newsError ? (
+            <p style={styles.status}>{newsError}</p>
           ) : news.length === 0 ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Noticias</span>
@@ -218,6 +308,41 @@ function HomePage() {
                 </div>
               </article>
             ))
+          )}
+        </div>
+      </section>
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Próximo Partido</h2>
+        <div style={styles.grid}>
+          {matchLoading ? (
+            <p style={styles.status}>Cargando fixture...</p>
+          ) : matchError ? (
+            <p style={styles.status}>{matchError}</p>
+          ) : !nextMatch ? (
+            <div style={styles.placeholderCard}>
+              <span style={styles.placeholderLabel}>Fixture</span>
+              <p style={styles.placeholderText}>Próximo partido</p>
+            </div>
+          ) : (
+            <article style={styles.matchCard}>
+              <p style={styles.matchLabel}>Próximo partido</p>
+              <h3 style={styles.matchRival}>{`vs ${nextMatch.rival}`}</h3>
+              <div style={styles.matchRow}>
+                <div style={styles.matchMetaItem}>
+                  <span style={styles.matchMetaLabel}>Fecha</span>
+                  <span style={styles.matchMetaValue}>{formatDate(nextMatch.date)}</span>
+                </div>
+                <div style={styles.matchMetaItem}>
+                  <span style={styles.matchMetaLabel}>Hora</span>
+                  <span style={styles.matchMetaValue}>{formatTime(nextMatch.date)}</span>
+                </div>
+                <div style={styles.matchMetaItem}>
+                  <span style={styles.matchMetaLabel}>Torneo</span>
+                  <span style={styles.matchMetaValue}>{nextMatch.competition}</span>
+                </div>
+              </div>
+            </article>
           )}
         </div>
       </section>
