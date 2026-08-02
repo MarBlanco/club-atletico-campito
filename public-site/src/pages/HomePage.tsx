@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import type { News } from '../types/news'
 import type { Match } from '../types/matches'
 import type { Club } from '../types/club'
+import type { Media } from '../types/media'
 import { getLatestNews } from '../services/newsService'
 import { getNextMatch } from '../services/matchesService'
 import { getClub } from '../services/clubService'
+import { getLatestMedia } from '../services/mediaService'
 
 function HomePage() {
   const [news, setNews] = useState<News[]>([])
@@ -18,6 +20,10 @@ function HomePage() {
   const [club, setClub] = useState<Club | null>(null)
   const [clubLoading, setClubLoading] = useState(true)
   const [clubError, setClubError] = useState<string | null>(null)
+
+  const [media, setMedia] = useState<Media[]>([])
+  const [mediaLoading, setMediaLoading] = useState(true)
+  const [mediaError, setMediaError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -82,6 +88,29 @@ function HomePage() {
       })
       .finally(() => {
         if (!cancelled) setClubLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getLatestMedia(4)
+      .then(data => {
+        if (!cancelled) {
+          setMedia(data)
+          setMediaError(null)
+        }
+      })
+      .catch(e => {
+        if (!cancelled) {
+          setMediaError(e instanceof Error ? e.message : 'Error al cargar multimedia')
+          setMedia([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setMediaLoading(false)
       })
     return () => {
       cancelled = true
@@ -322,6 +351,37 @@ function HomePage() {
       margin: 0,
       whiteSpace: 'pre-line' as const,
     } as React.CSSProperties,
+
+    mediaCard: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: 8,
+      overflow: 'hidden',
+      position: 'relative' as const,
+      minHeight: 180,
+      display: 'flex',
+    } as React.CSSProperties,
+
+    mediaThumb: {
+      width: '100%',
+      height: 180,
+      objectFit: 'cover' as const,
+      backgroundColor: '#f3f4f6',
+    } as React.CSSProperties,
+
+    mediaBadge: {
+      position: 'absolute' as const,
+      top: 8,
+      left: 8,
+      padding: '2px 8px',
+      borderRadius: 12,
+      fontSize: 11,
+      fontWeight: 700,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.5,
+      backgroundColor: 'rgba(18, 58, 158, 0.9)',
+      color: '#ffffff',
+    } as React.CSSProperties,
   }
 
   function formatDate(iso: string) {
@@ -469,6 +529,33 @@ function HomePage() {
                 </div>
               </div>
             </article>
+          )}
+        </div>
+      </section>
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Multimedia</h2>
+        <div style={styles.grid}>
+          {mediaLoading ? (
+            <p style={styles.status}>Cargando multimedia...</p>
+          ) : mediaError ? (
+            <p style={styles.status}>{mediaError}</p>
+          ) : media.length === 0 ? (
+            <div style={styles.placeholderCard}>
+              <span style={styles.placeholderLabel}>Multimedia</span>
+              <p style={styles.placeholderText}>Último contenido</p>
+            </div>
+          ) : (
+            media.map(item => (
+              <article key={item.id} style={styles.mediaCard}>
+                <img
+                  src={item.thumbnail_url || item.url}
+                  alt={`Multimedia ${item.type}`}
+                  style={styles.mediaThumb}
+                />
+                <span style={styles.mediaBadge}>{item.type}</span>
+              </article>
+            ))
           )}
         </div>
       </section>
