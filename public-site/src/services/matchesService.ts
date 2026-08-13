@@ -15,3 +15,13 @@ export async function getNextMatch(): Promise<Match | null> {
   if (error) throw error
   return data
 }
+
+export async function getMatches(): Promise<Match[]> {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .order('date', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
