@@ -13,3 +13,13 @@ export async function getLatestMedia(limit = 4): Promise<Media[]> {
   if (error) throw error
   return data
 }
+
+export async function getMedia(): Promise<Media[]> {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
