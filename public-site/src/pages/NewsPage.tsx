@@ -151,6 +151,8 @@ function NewsPage() {
                 <img
                   src={item.image_url}
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   style={styles.image}
                 />
               )}

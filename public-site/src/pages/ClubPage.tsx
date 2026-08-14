@@ -143,6 +143,8 @@ function ClubPage() {
               <img
                 src={club.logo_url}
                 alt="Escudo Club Atlético Campito"
+                loading="lazy"
+                decoding="async"
                 style={styles.logo}
               />
             )}

@@ -132,12 +132,15 @@ function MultimediaPage() {
                   src={item.url}
                   poster={item.thumbnail_url || undefined}
                   controls
+                  preload="metadata"
                   style={styles.thumb}
                 />
               ) : (
                 <img
                   src={item.thumbnail_url || item.url}
                   alt={`${TYPE_LABELS[item.type]} multimedia`}
+                  loading="lazy"
+                  decoding="async"
                   style={styles.thumb}
                 />
               )}

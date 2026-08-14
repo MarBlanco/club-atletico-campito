@@ -1,15 +1,18 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import AuthGuard from '../components/common/AuthGuard'
 import LoginPage from '../pages/LoginPage'
-import DashboardPage from '../pages/DashboardPage'
-import NoticiasPage from '../pages/NoticiasPage'
-import JugadoresPage from '../pages/JugadoresPage'
-import StaffPage from '../pages/StaffPage'
-import FixturePage from '../pages/FixturePage'
-import MultimediaPage from '../pages/MultimediaPage'
-import GalleriesPage from '../pages/GalleriesPage'
-import ClubPage from '../pages/ClubPage'
+
+const DashboardPage = lazy(() => import('../pages/DashboardPage'))
+const NoticiasPage = lazy(() => import('../pages/NoticiasPage'))
+const JugadoresPage = lazy(() => import('../pages/JugadoresPage'))
+const StaffPage = lazy(() => import('../pages/StaffPage'))
+const FixturePage = lazy(() => import('../pages/FixturePage'))
+const MultimediaPage = lazy(() => import('../pages/MultimediaPage'))
+const GalleriesPage = lazy(() => import('../pages/GalleriesPage'))
+const ClubPage = lazy(() => import('../pages/ClubPage'))
 
 const router = createBrowserRouter([
   {

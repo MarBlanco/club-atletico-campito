@@ -520,6 +520,8 @@ function HomePage() {
                   <img
                     src={club.logo_url}
                     alt="Escudo Club Atlético Campito"
+                    loading="lazy"
+                    decoding="async"
                     style={styles.clubLogo}
                   />
                 )}
@@ -565,6 +567,8 @@ function HomePage() {
                   <img
                     src={item.image_url}
                     alt={item.title}
+                    loading="lazy"
+                    decoding="async"
                     style={styles.newsImage}
                   />
                 )}
@@ -632,6 +636,8 @@ function HomePage() {
                 <img
                   src={item.thumbnail_url || item.url}
                   alt={`Multimedia ${item.type}`}
+                  loading="lazy"
+                  decoding="async"
                   style={styles.mediaThumb}
                 />
                 <span style={styles.mediaBadge}>{item.type}</span>
@@ -659,6 +665,8 @@ function HomePage() {
                 <img
                   src={g.cover_image}
                   alt={g.title}
+                  loading="lazy"
+                  decoding="async"
                   style={styles.galleryCover}
                 />
                 <div style={styles.galleryBody}>

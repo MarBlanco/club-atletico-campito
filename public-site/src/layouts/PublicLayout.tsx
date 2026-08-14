@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 
 const styles = {
@@ -121,7 +122,9 @@ function PublicLayout() {
       </header>
 
       <main style={styles.main}>
-        <Outlet />
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer style={styles.footer}>
@@ -134,3 +137,11 @@ function PublicLayout() {
 }
 
 export default PublicLayout
+
+function PageFallback() {
+  return (
+    <div style={{ padding: '64px 24px', textAlign: 'center' as const, color: '#6b7280', fontSize: 14 }}>
+      Cargando...
+    </div>
+  )
+}

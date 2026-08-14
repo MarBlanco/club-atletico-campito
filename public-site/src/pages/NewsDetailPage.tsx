@@ -166,7 +166,13 @@ function NewsDetailPage() {
 
       <article style={styles.article}>
         {news.image_url && (
-          <img src={news.image_url} alt={news.title} style={styles.heroImage} />
+          <img
+            src={news.image_url}
+            alt={news.title}
+            decoding="async"
+            fetchPriority="high"
+            style={styles.heroImage}
+          />
         )}
         <div style={styles.body}>
           <p style={styles.date}>{formatDate(news.created_at)}</p>
