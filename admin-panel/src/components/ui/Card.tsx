@@ -1,8 +1,14 @@
-import type { PropsWithChildren } from 'react'
+import type { CSSProperties, PropsWithChildren } from 'react'
 
-function Card({ children }: PropsWithChildren) {
+interface CardProps extends PropsWithChildren {
+  style?: CSSProperties
+}
+
+function Card({ children, style }: CardProps) {
   return (
-    <div>{children}</div>
+    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 20, ...style }}>
+      {children}
+    </div>
   )
 }
 
