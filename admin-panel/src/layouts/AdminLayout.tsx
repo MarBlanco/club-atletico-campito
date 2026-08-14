@@ -142,7 +142,7 @@ const navItems = [
   { to: '/jugadores', label: 'Jugadores' },
   { to: '/staff', label: 'Staff' },
   { to: '/fixture', label: 'Fixture' },
-  { to: '/galerias', label: 'Galerías' },
+  { to: '/galerias', label: 'Momentos Campito' },
   { to: '/multimedia', label: 'Multimedia' },
 ]
 
