@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useIsMobile } from '../hooks/useMediaQuery'
@@ -156,12 +156,23 @@ function AdminLayout() {
     navigate('/login', { replace: true })
   }
 
+  useEffect(() => {
+    if (!isMobile || !sidebarOpen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSidebarOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isMobile, sidebarOpen])
+
   return (
     <div style={styles.root}>
       {isMobile && sidebarOpen && (
         <div style={styles.backdrop} onClick={() => setSidebarOpen(false)} />
       )}
       <aside
+        id="admin-sidebar"
+        inert={isMobile && !sidebarOpen}
         style={{
           ...styles.sidebar,
           ...(isMobile
@@ -197,7 +208,9 @@ function AdminLayout() {
           {isMobile && (
             <button
               type="button"
-              aria-label="Abrir menú"
+              aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={sidebarOpen}
+              aria-controls="admin-sidebar"
               onClick={() => setSidebarOpen(true)}
               style={styles.menuButton}
             >

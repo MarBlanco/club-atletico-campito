@@ -144,7 +144,7 @@ function PublicLayout() {
     <div style={styles.root}>
       <header style={styles.header}>
         <div style={styles.headerInner}>
-          <NavLink to="/" style={styles.brand}>
+          <NavLink to="/" onClick={() => setMenuOpen(false)} style={styles.brand}>
             Club Atlético Campito
           </NavLink>
           {isMobile ? (
