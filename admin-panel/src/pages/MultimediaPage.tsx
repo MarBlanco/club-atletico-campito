@@ -66,12 +66,13 @@ function MultimediaPage() {
 
   async function handleUpload() {
     if (!file) return
+    const targetType = form.type
     setUploading(true)
     try {
-      const { publicUrl } = form.type === 'video'
+      const { publicUrl } = targetType === 'video'
         ? await uploadVideo(file, 'videos')
         : await uploadImage(file, 'galleries')
-      setForm(p => ({ ...p, url: publicUrl }))
+      setForm(p => (p.type === targetType ? { ...p, url: publicUrl } : p))
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (e: unknown) {
@@ -144,11 +145,12 @@ function MultimediaPage() {
                 style={inputStyle}
               />
             </Field>
-            <Field label="Archivo" style={{ gridColumn: '1 / -1' }}>
+            <Field label="Archivo" htmlFor="media-file" style={{ gridColumn: '1 / -1' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input
                     ref={fileInputRef}
+                    id="media-file"
                     type="file"
                     accept={form.type === 'video' ? 'video/*' : 'image/*'}
                     onChange={e => setFile(e.target.files?.[0] ?? null)}
@@ -259,10 +261,10 @@ function MultimediaPage() {
   )
 }
 
-function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: React.CSSProperties }) {
+function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...style }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )
