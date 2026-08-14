@@ -26,7 +26,7 @@ const router = createBrowserRouter([
       { path: '/noticias/:id', element: <NewsDetailPage /> },
       { path: '/fixture', element: <FixturePage /> },
       { path: '/multimedia', element: <MultimediaPage /> },
-      { path: '/comunidad', element: <CommunityPage /> },
+      { path: '/momentos', element: <CommunityPage /> },
       { path: '/contacto', element: <ContactPage /> },
     ],
   },
