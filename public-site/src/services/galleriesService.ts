@@ -13,3 +13,13 @@ export async function getLatestGalleries(limit = 4): Promise<Gallery[]> {
   if (error) throw error
   return data
 }
+
+export async function getGalleries(): Promise<Gallery[]> {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .order('match_date', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
