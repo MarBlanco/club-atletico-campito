@@ -30,6 +30,7 @@ function clamp(value: number, min: number, max: number) {
 
 function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [display, setDisplay] = useState<ImageDisplay | null>(null)
   const [crop, setCrop] = useState<Rect | null>(null)
@@ -142,14 +143,35 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onCancel()
+      if (e.key === 'Escape' && !saving) onCancel()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onCancel])
+  }, [onCancel, saving])
+
+  function onDialogKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== 'Tab') return
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 
   return (
     <div
+      ref={dialogRef}
+      onKeyDown={onDialogKeyDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby="crop-modal-title"
@@ -258,7 +280,7 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-          <button type="button" autoFocus onClick={onCancel} style={btnStyle('#6b7280')}>
+          <button type="button" autoFocus onClick={onCancel} disabled={saving} style={btnStyle('#6b7280')}>
             Cancelar
           </button>
           <button type="button" onClick={handleSave} disabled={saving || !crop} style={btnStyle('#059669')}>

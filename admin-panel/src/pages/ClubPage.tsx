@@ -82,7 +82,11 @@ function ClubPage() {
   }
 
   if (!club) {
-    return <p style={{ color: '#ef4444', fontSize: 14 }}>No se encontró el registro del club.</p>
+    return error ? (
+      <p style={{ color: '#ef4444', fontSize: 14 }} role="alert">{error}</p>
+    ) : (
+      <p style={{ color: '#ef4444', fontSize: 14 }}>No se encontró el registro del club.</p>
+    )
   }
 
   return (

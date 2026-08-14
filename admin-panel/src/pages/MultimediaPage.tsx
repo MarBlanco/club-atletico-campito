@@ -186,16 +186,18 @@ function MultimediaPage() {
                 )}
               </div>
             </Field>
-            <Field label="URL del archivo" style={{ gridColumn: '1 / -1' }}>
+            <Field label="URL del archivo" htmlFor="media-url" style={{ gridColumn: '1 / -1' }}>
               <input
+                id="media-url"
                 value={form.url}
                 onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
                 required
                 style={inputStyle}
               />
             </Field>
-            <Field label="URL de thumbnail (opcional)" style={{ gridColumn: '1 / -1' }}>
+            <Field label="URL de thumbnail (opcional)" htmlFor="media-thumbnail" style={{ gridColumn: '1 / -1' }}>
               <input
+                id="media-thumbnail"
                 value={form.thumbnail_url ?? ''}
                 onChange={e => setForm(p => ({ ...p, thumbnail_url: e.target.value || null }))}
                 style={inputStyle}
