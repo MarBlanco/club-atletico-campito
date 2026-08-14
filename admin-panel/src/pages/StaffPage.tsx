@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Staff, CreateStaffDTO, UpdateStaffDTO, StaffCategory } from '../types/staff'
 import { getStaff, createStaff, updateStaff, deleteStaff } from '../services/staffService'
 
@@ -19,6 +20,7 @@ const EMPTY_FORM: CreateStaffDTO = {
 }
 
 function StaffPage() {
+  const isMobile = useIsMobile()
   const [staff, setStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -105,7 +107,7 @@ function StaffPage() {
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar miembro' : 'Nuevo miembro'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Nombre">
               <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
             </Field>
@@ -146,7 +148,8 @@ function StaffPage() {
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay miembros del staff todavía.</p>
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={thStyle}>Nombre</th>
@@ -185,6 +188,7 @@ function StaffPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

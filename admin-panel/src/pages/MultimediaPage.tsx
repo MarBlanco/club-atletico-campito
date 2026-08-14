@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
 import { uploadImage, uploadVideo } from '../services/storageService'
@@ -16,6 +17,7 @@ const EMPTY_FORM: CreateMediaDTO = {
 }
 
 function MultimediaPage() {
+  const isMobile = useIsMobile()
   const [media, setMedia] = useState<Media[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -129,7 +131,7 @@ function MultimediaPage() {
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar archivo' : 'Nuevo archivo'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Tipo">
               <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
                 <option value="image">Imagen</option>
@@ -216,7 +218,8 @@ function MultimediaPage() {
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay archivos multimedia todavía.</p>
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={thStyle}>Tipo</th>
@@ -255,6 +258,7 @@ function MultimediaPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

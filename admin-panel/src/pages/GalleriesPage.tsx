@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Gallery, CreateGalleryDTO, UpdateGalleryDTO, GalleryCategory } from '../types/galleries'
 import { getGalleries, createGallery, updateGallery, deleteGallery } from '../services/galleriesService'
 
@@ -21,6 +22,7 @@ const EMPTY_FORM: CreateGalleryDTO = {
 }
 
 function GalleriesPage() {
+  const isMobile = useIsMobile()
   const [galleries, setGalleries] = useState<Gallery[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -106,7 +108,7 @@ function GalleriesPage() {
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar galería' : 'Nueva galería'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Título" style={{ gridColumn: '1 / -1' }}>
               <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required style={inputStyle} />
             </Field>
@@ -146,7 +148,8 @@ function GalleriesPage() {
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay galerías todavía.</p>
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={thStyle}>Título</th>
@@ -190,6 +193,7 @@ function GalleriesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

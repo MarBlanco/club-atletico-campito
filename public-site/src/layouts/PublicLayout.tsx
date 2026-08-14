@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 const styles = {
   root: {
@@ -58,6 +60,47 @@ const styles = {
     color: '#ffffff',
   } as React.CSSProperties,
 
+  menuButton: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 5,
+    background: 'none',
+    border: 'none',
+    padding: 8,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+
+  menuBar: {
+    width: 22,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#123A9E',
+  } as React.CSSProperties,
+
+  navMobile: {
+    position: 'absolute' as const,
+    top: 72,
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #e5e7eb',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    padding: '8px 16px 16px',
+    gap: 2,
+  } as React.CSSProperties,
+
+  navLinkMobile: {
+    padding: '12px 12px',
+    borderRadius: 6,
+    color: '#111111',
+    textDecoration: 'none',
+    fontSize: 15,
+    fontWeight: 500,
+    transition: 'background 0.15s, color 0.15s',
+  } as React.CSSProperties,
+
   main: {
     flex: 1,
     maxWidth: 1200,
@@ -94,6 +137,8 @@ const navItems = [
 
 function PublicLayout() {
   const year = new Date().getFullYear()
+  const isMobile = useIsMobile()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div style={styles.root}>
@@ -102,25 +147,57 @@ function PublicLayout() {
           <NavLink to="/" style={styles.brand}>
             Club Atlético Campito
           </NavLink>
-          <nav style={styles.nav}>
+          {isMobile ? (
+            <button
+              type="button"
+              aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(open => !open)}
+              style={styles.menuButton}
+            >
+              <span style={styles.menuBar} />
+              <span style={styles.menuBar} />
+              <span style={styles.menuBar} />
+            </button>
+          ) : (
+            <nav style={styles.nav}>
+              {navItems.map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  style={({ isActive }) =>
+                    isActive
+                      ? { ...styles.navLink, ...styles.navLinkActive }
+                      : styles.navLink
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </nav>
+          )}
+        </div>
+        {isMobile && menuOpen && (
+          <nav style={styles.navMobile}>
             {navItems.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
+                onClick={() => setMenuOpen(false)}
                 style={({ isActive }) =>
                   isActive
-                    ? { ...styles.navLink, ...styles.navLinkActive }
-                    : styles.navLink
+                    ? { ...styles.navLinkMobile, ...styles.navLinkActive }
+                    : styles.navLinkMobile
                 }
               >
                 {label}
               </NavLink>
             ))}
           </nav>
-        </div>
+        )}
       </header>
 
-      <main style={styles.main}>
+      <main style={{ ...styles.main, padding: isMobile ? '24px 16px' : '32px 24px' }}>
         <Outlet />
       </main>
 

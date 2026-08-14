@@ -9,8 +9,10 @@ import { getNextMatch } from '../services/matchesService'
 import { getClub } from '../services/clubService'
 import { getLatestMedia } from '../services/mediaService'
 import { getLatestGalleries } from '../services/galleriesService'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 function HomePage() {
+  const isMobile = useIsMobile()
   const [news, setNews] = useState<News[]>([])
   const [newsLoading, setNewsLoading] = useState(true)
   const [newsError, setNewsError] = useState<string | null>(null)
@@ -150,14 +152,14 @@ function HomePage() {
     hero: {
       backgroundColor: '#123A9E',
       color: '#ffffff',
-      padding: '80px 24px',
+      padding: isMobile ? '48px 16px' : '80px 24px',
       borderRadius: 8,
       textAlign: 'center' as const,
       marginBottom: 48,
     } as React.CSSProperties,
 
     heroTitle: {
-      fontSize: 40,
+      fontSize: isMobile ? 28 : 40,
       fontWeight: 800,
       letterSpacing: 0.5,
       margin: 0,
@@ -165,7 +167,7 @@ function HomePage() {
     } as React.CSSProperties,
 
     heroSubtitle: {
-      fontSize: 18,
+      fontSize: isMobile ? 15 : 18,
       fontWeight: 400,
       margin: '16px 0 0',
       color: '#1EB9E8',

@@ -27,7 +27,7 @@ function LoginPage() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f4f6f9' }}>
-      <div style={{ background: '#fff', padding: 40, borderRadius: 8, width: 360, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+      <div style={{ background: '#fff', padding: 40, borderRadius: 8, width: 360, maxWidth: '100%', boxSizing: 'border-box', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
         <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: '#1a1a2e' }}>Club Campito CMS</h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 28 }}>Ingresá con tu cuenta</p>
 

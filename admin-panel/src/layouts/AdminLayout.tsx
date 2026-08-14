@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 const SIDEBAR_WIDTH = 220
 
@@ -22,7 +24,32 @@ const styles = {
     top: 0,
     left: 0,
     height: '100vh',
-    zIndex: 100,
+    zIndex: 200,
+  } as React.CSSProperties,
+
+  backdrop: {
+    position: 'fixed' as const,
+    inset: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    zIndex: 150,
+  } as React.CSSProperties,
+
+  menuButton: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 5,
+    background: 'none',
+    border: 'none',
+    padding: 4,
+    marginRight: 16,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+
+  menuBar: {
+    width: 22,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#1a1a2e',
   } as React.CSSProperties,
 
   sidebarTitle: {
@@ -121,6 +148,8 @@ const navItems = [
 
 function AdminLayout() {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -129,13 +158,27 @@ function AdminLayout() {
 
   return (
     <div style={styles.root}>
-      <aside style={styles.sidebar}>
+      {isMobile && sidebarOpen && (
+        <div style={styles.backdrop} onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside
+        style={{
+          ...styles.sidebar,
+          ...(isMobile
+            ? {
+                transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+                transition: 'transform 0.2s ease',
+              }
+            : {}),
+        }}
+      >
         <div style={styles.sidebarTitle}>Campito CMS</div>
         <nav style={styles.nav}>
           {navItems.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
+              onClick={() => setSidebarOpen(false)}
               style={({ isActive }) =>
                 isActive
                   ? { ...styles.navLink, ...styles.navLinkActive }
@@ -149,11 +192,23 @@ function AdminLayout() {
         <button style={styles.logout} onClick={handleLogout}>Cerrar sesión</button>
       </aside>
 
-      <div style={styles.body}>
-        <header style={styles.topbar}>
+      <div style={{ ...styles.body, marginLeft: isMobile ? 0 : SIDEBAR_WIDTH }}>
+        <header style={{ ...styles.topbar, padding: isMobile ? '0 16px' : '0 28px' }}>
+          {isMobile && (
+            <button
+              type="button"
+              aria-label="Abrir menú"
+              onClick={() => setSidebarOpen(true)}
+              style={styles.menuButton}
+            >
+              <span style={styles.menuBar} />
+              <span style={styles.menuBar} />
+              <span style={styles.menuBar} />
+            </button>
+          )}
           <span style={styles.topbarTitle}>Club Campito CMS</span>
         </header>
-        <main style={styles.content}>
+        <main style={{ ...styles.content, padding: isMobile ? 16 : 32 }}>
           <Outlet />
         </main>
       </div>
