@@ -31,9 +31,12 @@ beforeEach(() => {
 
 describe('clubService', () => {
   it('getClub devuelve la fila y consulta la tabla club', async () => {
-    mockFrom({ data: row })
+    const from = mockFrom({ data: row })
     await expect(getClub()).resolves.toEqual(row)
     expect(supabase.from).toHaveBeenCalledWith('club')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().limit).toHaveBeenCalledWith(1)
+    expect(from().single).toHaveBeenCalled()
   })
 
   it('getClub lanza el error cuando la consulta falla', async () => {

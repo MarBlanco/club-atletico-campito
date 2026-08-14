@@ -32,9 +32,11 @@ beforeEach(() => {
 
 describe('playersService', () => {
   it('getPlayers devuelve las filas y consulta la tabla players', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getPlayers()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('players')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('surname', { ascending: true })
   })
 
   it('getPlayers lanza el error cuando la consulta falla', async () => {

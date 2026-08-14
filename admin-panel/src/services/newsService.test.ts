@@ -32,9 +32,11 @@ beforeEach(() => {
 
 describe('newsService', () => {
   it('getNews devuelve las filas y consulta la tabla news', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getNews()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('news')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
 
   it('getNews lanza el error cuando la consulta falla', async () => {

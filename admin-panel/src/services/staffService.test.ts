@@ -30,9 +30,11 @@ beforeEach(() => {
 
 describe('staffService', () => {
   it('getStaff devuelve las filas y consulta la tabla staff', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getStaff()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('staff')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('name', { ascending: true })
   })
 
   it('getStaff lanza el error cuando la consulta falla', async () => {

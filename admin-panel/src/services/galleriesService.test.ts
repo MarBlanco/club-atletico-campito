@@ -30,9 +30,11 @@ beforeEach(() => {
 
 describe('galleriesService', () => {
   it('getGalleries devuelve las filas y consulta la tabla galleries', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getGalleries()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('galleries')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('match_date', { ascending: false })
   })
 
   it('getGalleries lanza el error cuando la consulta falla', async () => {

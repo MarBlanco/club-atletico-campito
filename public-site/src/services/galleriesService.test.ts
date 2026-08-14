@@ -33,6 +33,7 @@ describe('public galleriesService', () => {
     const from = mockFrom({ data: [row] })
     await expect(getLatestGalleries()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('galleries')
+    expect(from().order).toHaveBeenCalledWith('match_date', { ascending: false })
     expect(from().limit).toHaveBeenCalledWith(4)
   })
 

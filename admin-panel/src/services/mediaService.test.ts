@@ -30,9 +30,11 @@ beforeEach(() => {
 
 describe('mediaService', () => {
   it('getMedia devuelve las filas y consulta la tabla media', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getMedia()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('media')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
 
   it('getMedia lanza el error cuando la consulta falla', async () => {

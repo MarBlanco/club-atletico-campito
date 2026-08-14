@@ -33,6 +33,7 @@ describe('public mediaService', () => {
     const from = mockFrom({ data: [row] })
     await expect(getLatestMedia()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('media')
+    expect(from().order).toHaveBeenCalledWith('created_at', { ascending: false })
     expect(from().limit).toHaveBeenCalledWith(4)
   })
 

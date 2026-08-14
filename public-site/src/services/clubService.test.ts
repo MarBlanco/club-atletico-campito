@@ -34,7 +34,9 @@ describe('public clubService', () => {
     const from = mockFrom({ data: row })
     await expect(getClub()).resolves.toEqual(row)
     expect(supabase.from).toHaveBeenCalledWith('club')
+    expect(from().select).toHaveBeenCalledWith('*')
     expect(from().limit).toHaveBeenCalledWith(1)
+    expect(from().maybeSingle).toHaveBeenCalled()
   })
 
   it('getClub devuelve null cuando no hay fila', async () => {

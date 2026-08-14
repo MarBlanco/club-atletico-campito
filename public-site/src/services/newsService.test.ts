@@ -36,6 +36,7 @@ describe('public newsService', () => {
     await expect(getLatestNews()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('news')
     expect(from().eq).toHaveBeenCalledWith('published', true)
+    expect(from().order).toHaveBeenCalledWith('created_at', { ascending: false })
     expect(from().limit).toHaveBeenCalledWith(3)
   })
 

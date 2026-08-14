@@ -36,6 +36,7 @@ describe('public matchesService', () => {
     expect(supabase.from).toHaveBeenCalledWith('matches')
     expect(from().eq).toHaveBeenCalledWith('status', 'upcoming')
     expect(from().limit).toHaveBeenCalledWith(1)
+    expect(from().maybeSingle).toHaveBeenCalled()
   })
 
   it('getNextMatch devuelve null cuando no hay partido', async () => {
@@ -50,9 +51,10 @@ describe('public matchesService', () => {
   })
 
   it('getMatches devuelve las filas', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getMatches()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('matches')
+    expect(from().order).toHaveBeenCalledWith('date', { ascending: true })
   })
 
   it('getMatches devuelve array vacío cuando no hay datos', async () => {

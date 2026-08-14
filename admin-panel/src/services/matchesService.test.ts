@@ -31,9 +31,11 @@ beforeEach(() => {
 
 describe('matchesService', () => {
   it('getMatches devuelve las filas y consulta la tabla matches', async () => {
-    mockFrom({ data: [row] })
+    const from = mockFrom({ data: [row] })
     await expect(getMatches()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('matches')
+    expect(from().select).toHaveBeenCalledWith('*')
+    expect(from().order).toHaveBeenCalledWith('date', { ascending: false })
   })
 
   it('getMatches lanza el error cuando la consulta falla', async () => {
