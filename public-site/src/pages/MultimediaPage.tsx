@@ -114,9 +114,13 @@ function MultimediaPage() {
       </div>
 
       {loading ? (
-        <p style={styles.status}>Cargando multimedia...</p>
+        <p style={styles.status} role="status" aria-live="polite">
+          Cargando multimedia...
+        </p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">
+          {error}
+        </p>
       ) : items.length === 0 ? (
         <div style={styles.empty}>No hay contenido multimedia cargado todavía.</div>
       ) : (
@@ -133,7 +137,7 @@ function MultimediaPage() {
               ) : (
                 <img
                   src={item.thumbnail_url || item.url}
-                  alt={`Multimedia ${item.type}`}
+                  alt={`${TYPE_LABELS[item.type]} multimedia`}
                   style={styles.thumb}
                 />
               )}
