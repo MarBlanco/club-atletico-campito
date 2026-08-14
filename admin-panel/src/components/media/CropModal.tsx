@@ -140,17 +140,29 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
     }
   }
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onCancel])
+
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0, 0, 0, 0.55)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 50,
-      padding: 24,
-    }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="crop-modal-title"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.55)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 50,
+        padding: 24,
+      }}>
       <div style={{
         background: '#ffffff',
         borderRadius: 10,
@@ -159,7 +171,7 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
         maxWidth: 640,
         boxSizing: 'border-box',
       }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', margin: '0 0 16px' }}>
+        <h3 id="crop-modal-title" style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', margin: '0 0 16px' }}>
           Recortar imagen
         </h3>
 
@@ -246,7 +258,7 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-          <button type="button" onClick={onCancel} style={btnStyle('#6b7280')}>
+          <button type="button" autoFocus onClick={onCancel} style={btnStyle('#6b7280')}>
             Cancelar
           </button>
           <button type="button" onClick={handleSave} disabled={saving || !crop} style={btnStyle('#059669')}>

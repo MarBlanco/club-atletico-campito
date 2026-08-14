@@ -134,7 +134,7 @@ function NewsDetailPage() {
     return (
       <div>
         <Link to="/noticias" style={styles.back}>← Volver a noticias</Link>
-        <p style={styles.status}>Cargando noticia...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando noticia...</p>
       </div>
     )
   }
@@ -143,7 +143,7 @@ function NewsDetailPage() {
     return (
       <div>
         <Link to="/noticias" style={styles.back}>← Volver a noticias</Link>
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       </div>
     )
   }

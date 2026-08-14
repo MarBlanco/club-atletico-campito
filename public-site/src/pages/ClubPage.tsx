@@ -131,9 +131,9 @@ function ClubPage() {
       </div>
 
       {loading ? (
-        <p style={styles.status}>Cargando club...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando club...</p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       ) : !club ? (
         <div style={styles.empty}>El club no tiene información cargada todavía.</div>
       ) : (

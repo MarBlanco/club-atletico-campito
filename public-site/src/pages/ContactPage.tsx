@@ -127,9 +127,9 @@ function ContactPage() {
 
       <h2 style={styles.sectionTitle}>Ubicación</h2>
       {loading ? (
-        <p style={styles.status}>Cargando contacto...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando contacto...</p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       ) : !club ? (
         <div style={styles.empty}>
           El club no tiene información cargada todavía.

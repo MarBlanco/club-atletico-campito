@@ -78,7 +78,7 @@ function ClubPage() {
   }
 
   if (loading) {
-    return <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+    return <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
   }
 
   if (!club) {
@@ -94,13 +94,14 @@ function ClubPage() {
         </p>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
       {saved && <p style={{ color: '#16a34a', marginBottom: 16, fontSize: 13 }}>Cambios guardados.</p>}
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24 }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Field label="Historia">
+          <Field label="Historia" htmlFor="club-history">
             <textarea
+              id="club-history"
               value={form.history ?? ''}
               onChange={e => setForm(p => ({ ...p, history: e.target.value }))}
               required
@@ -108,35 +109,39 @@ function ClubPage() {
               style={textareaStyle}
             />
           </Field>
-          <Field label="Misión">
+          <Field label="Misión" htmlFor="club-mission">
             <textarea
+              id="club-mission"
               value={form.mission ?? ''}
               onChange={e => setForm(p => ({ ...p, mission: e.target.value || null }))}
               rows={4}
               style={textareaStyle}
             />
           </Field>
-          <Field label="Valores">
+          <Field label="Valores" htmlFor="club-values">
             <textarea
+              id="club-values"
               value={form.values ?? ''}
               onChange={e => setForm(p => ({ ...p, values: e.target.value || null }))}
               rows={4}
               style={textareaStyle}
             />
           </Field>
-          <Field label="Ubicación">
+          <Field label="Ubicación" htmlFor="club-location">
             <input
+              id="club-location"
               value={form.location ?? ''}
               onChange={e => setForm(p => ({ ...p, location: e.target.value }))}
               required
               style={inputStyle}
             />
           </Field>
-          <Field label="Logo">
+          <Field label="Logo" htmlFor="club-logo">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input
                   ref={fileInputRef}
+                  id="club-logo"
                   type="file"
                   accept="image/*"
                   onChange={e => setImageFile(e.target.files?.[0] ?? null)}
@@ -174,10 +179,10 @@ function ClubPage() {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )

@@ -96,7 +96,7 @@ function JugadoresPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo jugador</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
@@ -104,22 +104,22 @@ function JugadoresPage() {
             {editingId ? 'Editar jugador' : 'Nuevo jugador'}
           </h3>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <Field label="Nombre">
-              <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
+            <Field label="Nombre" htmlFor="player-name">
+              <input id="player-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Apellido">
-              <input value={form.surname} onChange={e => setForm(p => ({ ...p, surname: e.target.value }))} required style={inputStyle} />
+            <Field label="Apellido" htmlFor="player-surname">
+              <input id="player-surname" value={form.surname} onChange={e => setForm(p => ({ ...p, surname: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Número">
-              <input type="number" min={0} max={99} value={form.number} onChange={e => setForm(p => ({ ...p, number: Number(e.target.value) }))} required style={inputStyle} />
+            <Field label="Número" htmlFor="player-number">
+              <input id="player-number" type="number" min={0} max={99} value={form.number} onChange={e => setForm(p => ({ ...p, number: Number(e.target.value) }))} required style={inputStyle} />
             </Field>
-            <Field label="Posición">
-              <select value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value as Position }))} style={inputStyle}>
+            <Field label="Posición" htmlFor="player-position">
+              <select id="player-position" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value as Position }))} style={inputStyle}>
                 {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
               </select>
             </Field>
-            <Field label="URL de imagen" style={{ gridColumn: '1 / -1' }}>
-              <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} required style={inputStyle} />
+            <Field label="URL de imagen" htmlFor="player-image" style={{ gridColumn: '1 / -1' }}>
+              <input id="player-image" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} required style={inputStyle} />
             </Field>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
@@ -138,7 +138,7 @@ function JugadoresPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : players.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay jugadores todavía.</p>
       ) : (
@@ -190,10 +190,10 @@ function JugadoresPage() {
   )
 }
 
-function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: React.CSSProperties }) {
+function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...style }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )

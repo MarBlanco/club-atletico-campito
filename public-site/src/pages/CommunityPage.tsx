@@ -142,9 +142,9 @@ function CommunityPage() {
       </div>
 
       {loading ? (
-        <p style={styles.status}>Cargando momentos...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando momentos...</p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       ) : galleries.length === 0 ? (
         <div style={styles.empty}>No hay momentos cargados todavía.</div>
       ) : (

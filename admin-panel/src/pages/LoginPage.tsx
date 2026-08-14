@@ -33,8 +33,9 @@ function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>Email</label>
+            <label htmlFor="login-email" style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -45,8 +46,9 @@ function LoginPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>Contraseña</label>
+            <label htmlFor="login-password" style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>Contraseña</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -57,7 +59,7 @@ function LoginPage() {
           </div>
 
           {error && (
-            <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{error}</p>
+            <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }} role="alert">{error}</p>
           )}
 
           <button

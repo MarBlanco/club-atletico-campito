@@ -122,7 +122,7 @@ function MultimediaPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo archivo</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
@@ -130,14 +130,15 @@ function MultimediaPage() {
             {editingId ? 'Editar archivo' : 'Nuevo archivo'}
           </h3>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <Field label="Tipo">
-              <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
+            <Field label="Tipo" htmlFor="media-type">
+              <select id="media-type" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
                 <option value="image">Imagen</option>
                 <option value="video">Video</option>
               </select>
             </Field>
-            <Field label="ID de galería">
+            <Field label="ID de galería" htmlFor="media-gallery">
               <input
+                id="media-gallery"
                 value={form.gallery_id}
                 onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))}
                 required
@@ -211,7 +212,7 @@ function MultimediaPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : media.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay archivos multimedia todavía.</p>
       ) : (

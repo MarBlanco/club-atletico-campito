@@ -505,9 +505,9 @@ function HomePage() {
         <h2 style={styles.sectionTitle}>Club</h2>
         <div style={styles.grid}>
           {clubLoading ? (
-            <p style={styles.status}>Cargando club...</p>
+            <p style={styles.status} role="status" aria-live="polite">Cargando club...</p>
           ) : clubError ? (
-            <p style={styles.status}>{clubError}</p>
+            <p style={styles.status} role="alert">{clubError}</p>
           ) : !club ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Club</span>
@@ -550,9 +550,9 @@ function HomePage() {
         <h2 style={styles.sectionTitle}>Noticias</h2>
         <div style={styles.grid}>
           {newsLoading ? (
-            <p style={styles.status}>Cargando noticias...</p>
+            <p style={styles.status} role="status" aria-live="polite">Cargando noticias...</p>
           ) : newsError ? (
-            <p style={styles.status}>{newsError}</p>
+            <p style={styles.status} role="alert">{newsError}</p>
           ) : news.length === 0 ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Noticias</span>
@@ -583,9 +583,9 @@ function HomePage() {
         <h2 style={styles.sectionTitle}>Próximo Partido</h2>
         <div style={styles.grid}>
           {matchLoading ? (
-            <p style={styles.status}>Cargando fixture...</p>
+            <p style={styles.status} role="status" aria-live="polite">Cargando fixture...</p>
           ) : matchError ? (
-            <p style={styles.status}>{matchError}</p>
+            <p style={styles.status} role="alert">{matchError}</p>
           ) : !nextMatch ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Fixture</span>
@@ -618,9 +618,9 @@ function HomePage() {
         <h2 style={styles.sectionTitle}>Multimedia</h2>
         <div style={styles.grid}>
           {mediaLoading ? (
-            <p style={styles.status}>Cargando multimedia...</p>
+            <p style={styles.status} role="status" aria-live="polite">Cargando multimedia...</p>
           ) : mediaError ? (
-            <p style={styles.status}>{mediaError}</p>
+            <p style={styles.status} role="alert">{mediaError}</p>
           ) : media.length === 0 ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Multimedia</span>
@@ -645,9 +645,9 @@ function HomePage() {
         <h2 style={styles.sectionTitle}>Momentos Campito</h2>
         <div style={styles.grid}>
           {galleriesLoading ? (
-            <p style={styles.status}>Cargando momentos campito...</p>
+            <p style={styles.status} role="status" aria-live="polite">Cargando momentos campito...</p>
           ) : galleriesError ? (
-            <p style={styles.status}>{galleriesError}</p>
+            <p style={styles.status} role="alert">{galleriesError}</p>
           ) : galleries.length === 0 ? (
             <div style={styles.placeholderCard}>
               <span style={styles.placeholderLabel}>Momentos Campito</span>
