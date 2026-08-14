@@ -165,7 +165,7 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
 
         {error ? (
           <p style={{ color: '#ef4444', fontSize: 13, margin: '0 0 16px' }}>{error}</p>
-        ) : display && crop ? (
+        ) : (
           <div
             ref={containerRef}
             style={{
@@ -182,50 +182,67 @@ function CropModal({ src, aspectRatio = 1, onCancel, onSave }: CropModalProps) {
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
           >
-            <img
-              src={src}
-              alt="Imagen a recortar"
-              style={{
-                position: 'absolute',
-                left: display.x,
-                top: display.y,
-                width: display.width,
-                height: display.height,
-                display: 'block',
-              }}
-            />
-            <div
-              onPointerDown={e => onPointerDown(e, 'move')}
-              style={{
-                position: 'absolute',
-                left: display.x + crop.x,
-                top: display.y + crop.y,
-                width: crop.width,
-                height: crop.height,
-                border: '2px solid #1EB9E8',
-                boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)',
-                cursor: 'move',
-                boxSizing: 'border-box',
-              }}
-            >
-              <div
-                onPointerDown={e => onPointerDown(e, 'resize')}
+            {display && crop ? (
+              <>
+                <img
+                  src={src}
+                  alt="Imagen a recortar"
+                  style={{
+                    position: 'absolute',
+                    left: display.x,
+                    top: display.y,
+                    width: display.width,
+                    height: display.height,
+                    display: 'block',
+                  }}
+                />
+                <div
+                  onPointerDown={e => onPointerDown(e, 'move')}
+                  style={{
+                    position: 'absolute',
+                    left: display.x + crop.x,
+                    top: display.y + crop.y,
+                    width: crop.width,
+                    height: crop.height,
+                    border: '2px solid #1EB9E8',
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)',
+                    cursor: 'move',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <div
+                    onPointerDown={e => onPointerDown(e, 'resize')}
+                    style={{
+                      position: 'absolute',
+                      right: -7,
+                      bottom: -7,
+                      width: 14,
+                      height: 14,
+                      background: '#1EB9E8',
+                      border: '2px solid #ffffff',
+                      borderRadius: 4,
+                      cursor: 'nwse-resize',
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <p
                 style={{
                   position: 'absolute',
-                  right: -7,
-                  bottom: -7,
-                  width: 14,
-                  height: 14,
-                  background: '#1EB9E8',
-                  border: '2px solid #ffffff',
-                  borderRadius: 4,
-                  cursor: 'nwse-resize',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#9ca3af',
+                  fontSize: 13,
+                  margin: 0,
                 }}
-              />
-            </div>
+              >
+                Cargando imagen...
+              </p>
+            )}
           </div>
-        ) : (
-          <p style={{ color: '#6b7280', fontSize: 14, margin: '0 0 20px' }}>Cargando imagen...</p>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
