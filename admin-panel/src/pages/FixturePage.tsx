@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
-import type { Match, CreateMatchDTO, UpdateMatchDTO, MatchStatus } from '../types/matches'
+import type { Match, CreateMatchDTO, MatchStatus } from '../types/matches'
 import { getMatches, createMatch, updateMatch, deleteMatch } from '../services/matchesService'
 
 const STATUS_LABELS: Record<MatchStatus, string> = {
@@ -33,6 +33,7 @@ function FixturePage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateMatchDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     getMatches()
@@ -66,17 +67,36 @@ function FixturePage() {
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
+    setFormError(null)
+  }
+
+  function handleStatusChange(status: MatchStatus) {
+    setForm(p => ({
+      ...p,
+      status,
+      goals_for: status === 'upcoming' ? null : p.goals_for,
+      goals_against: status === 'upcoming' ? null : p.goals_against,
+    }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setFormError(null)
+    if (form.status === 'finished' && (form.goals_for === null || form.goals_against === null)) {
+      setFormError('Ingresá los goles para marcar el partido como finalizado')
+      return
+    }
+    const dto: CreateMatchDTO = {
+      ...form,
+      goals_for: form.status === 'upcoming' ? null : form.goals_for,
+      goals_against: form.status === 'upcoming' ? null : form.goals_against,
+    }
     setSaving(true)
     try {
       if (editingId) {
-        const dto: UpdateMatchDTO = form
         await updateMatch(editingId, dto)
       } else {
-        await createMatch(form)
+        await createMatch(dto)
       }
       closeForm()
       reload()
@@ -133,7 +153,7 @@ function FixturePage() {
               <input id="match-competition" value={form.competition} onChange={e => setForm(p => ({ ...p, competition: e.target.value }))} required style={inputStyle} />
             </Field>
             <Field label="Estado" htmlFor="match-status">
-              <select id="match-status" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as MatchStatus }))} style={inputStyle}>
+              <select id="match-status" value={form.status} onChange={e => handleStatusChange(e.target.value as MatchStatus)} style={inputStyle}>
                 <option value="upcoming">Próximo</option>
                 <option value="finished">Finalizado</option>
               </select>
@@ -144,7 +164,7 @@ function FixturePage() {
                 type="number"
                 min={0}
                 value={form.goals_for ?? ''}
-                onChange={e => setForm(p => ({ ...p, goals_for: e.target.value === '' ? null : Number(e.target.value) }))}
+                onChange={e => setForm(p => ({ ...p, goals_for: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))}
                 style={inputStyle}
               />
             </Field>
@@ -154,10 +174,13 @@ function FixturePage() {
                 type="number"
                 min={0}
                 value={form.goals_against ?? ''}
-                onChange={e => setForm(p => ({ ...p, goals_against: e.target.value === '' ? null : Number(e.target.value) }))}
+                onChange={e => setForm(p => ({ ...p, goals_against: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))}
                 style={inputStyle}
               />
             </Field>
+            <div style={{ gridColumn: '1 / -1' }}>
+              {formError && <p style={{ color: '#ef4444', marginBottom: 10, fontSize: 13 }} role="alert">{formError}</p>}
+            </div>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
               <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
                 {saving ? 'Guardando...' : 'Guardar'}
