@@ -136,9 +136,9 @@ function NewsPage() {
       </div>
 
       {loading ? (
-        <p style={styles.status}>Cargando noticias...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando noticias...</p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       ) : news.length === 0 ? (
         <div style={styles.empty}>
           No hay noticias publicadas todavía.

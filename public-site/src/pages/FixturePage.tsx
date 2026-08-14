@@ -166,9 +166,9 @@ function FixturePage() {
       </div>
 
       {loading ? (
-        <p style={styles.status}>Cargando fixture...</p>
+        <p style={styles.status} role="status" aria-live="polite">Cargando fixture...</p>
       ) : error ? (
-        <p style={styles.status}>{error}</p>
+        <p style={styles.status} role="alert">{error}</p>
       ) : matches.length === 0 ? (
         <div style={styles.empty}>No hay partidos cargados todavía.</div>
       ) : (

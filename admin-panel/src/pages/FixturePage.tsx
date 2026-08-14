@@ -115,31 +115,32 @@ function FixturePage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo partido</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar partido' : 'Nuevo partido'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            <Field label="Rival">
-              <input value={form.rival} onChange={e => setForm(p => ({ ...p, rival: e.target.value }))} required style={inputStyle} />
+<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
+            <Field label="Rival" htmlFor="match-rival">
+              <input id="match-rival" value={form.rival} onChange={e => setForm(p => ({ ...p, rival: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Fecha y hora">
-              <input type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required style={inputStyle} />
+            <Field label="Fecha y hora" htmlFor="match-date">
+              <input id="match-date" type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Competición">
-              <input value={form.competition} onChange={e => setForm(p => ({ ...p, competition: e.target.value }))} required style={inputStyle} />
+            <Field label="Competición" htmlFor="match-competition">
+              <input id="match-competition" value={form.competition} onChange={e => setForm(p => ({ ...p, competition: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Estado">
-              <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as MatchStatus }))} style={inputStyle}>
+            <Field label="Estado" htmlFor="match-status">
+              <select id="match-status" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as MatchStatus }))} style={inputStyle}>
                 <option value="upcoming">Próximo</option>
                 <option value="finished">Finalizado</option>
               </select>
             </Field>
-            <Field label="Goles a favor">
+            <Field label="Goles a favor" htmlFor="match-goals-for">
               <input
+                id="match-goals-for"
                 type="number"
                 min={0}
                 value={form.goals_for ?? ''}
@@ -147,8 +148,9 @@ function FixturePage() {
                 style={inputStyle}
               />
             </Field>
-            <Field label="Goles en contra">
+            <Field label="Goles en contra" htmlFor="match-goals-against">
               <input
+                id="match-goals-against"
                 type="number"
                 min={0}
                 value={form.goals_against ?? ''}
@@ -167,7 +169,7 @@ function FixturePage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : matches.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay partidos todavía.</p>
       ) : (
@@ -221,10 +223,10 @@ function FixturePage() {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )

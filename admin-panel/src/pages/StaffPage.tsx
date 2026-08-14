@@ -100,27 +100,28 @@ function StaffPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo miembro</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar miembro' : 'Nuevo miembro'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            <Field label="Nombre">
-              <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
+<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
+            <Field label="Nombre" htmlFor="staff-name">
+              <input id="staff-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Rol">
-              <input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} required style={inputStyle} />
+            <Field label="Rol" htmlFor="staff-role">
+              <input id="staff-role" value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Categoría">
-              <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as StaffCategory }))} style={inputStyle}>
+            <Field label="Categoría" htmlFor="staff-category">
+              <select id="staff-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as StaffCategory }))} style={inputStyle}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
               </select>
             </Field>
-            <Field label="URL de imagen (opcional)">
+            <Field label="URL de imagen (opcional)" htmlFor="staff-image">
               <input
+                id="staff-image"
                 value={form.image_url ?? ''}
                 onChange={e => setForm(p => ({ ...p, image_url: e.target.value || null }))}
                 style={inputStyle}
@@ -143,7 +144,7 @@ function StaffPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : staff.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay miembros del staff todavía.</p>
       ) : (
@@ -195,10 +196,10 @@ function StaffPage() {
   )
 }
 
-function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: React.CSSProperties }) {
+function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...style }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )

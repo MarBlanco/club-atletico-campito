@@ -124,22 +124,23 @@ function MultimediaPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo archivo</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar archivo' : 'Nuevo archivo'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            <Field label="Tipo">
-              <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
+<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
+            <Field label="Tipo" htmlFor="media-type">
+              <select id="media-type" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
                 <option value="image">Imagen</option>
                 <option value="video">Video</option>
               </select>
             </Field>
-            <Field label="ID de galería">
+            <Field label="ID de galería" htmlFor="media-gallery">
               <input
+                id="media-gallery"
                 value={form.gallery_id}
                 onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))}
                 required
@@ -187,16 +188,18 @@ function MultimediaPage() {
                 )}
               </div>
             </Field>
-            <Field label="URL del archivo" style={{ gridColumn: '1 / -1' }}>
+            <Field label="URL del archivo" htmlFor="media-url" style={{ gridColumn: '1 / -1' }}>
               <input
+                id="media-url"
                 value={form.url}
                 onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
                 required
                 style={inputStyle}
               />
             </Field>
-            <Field label="URL de thumbnail (opcional)" style={{ gridColumn: '1 / -1' }}>
+            <Field label="URL de thumbnail (opcional)" htmlFor="media-thumbnail" style={{ gridColumn: '1 / -1' }}>
               <input
+                id="media-thumbnail"
                 value={form.thumbnail_url ?? ''}
                 onChange={e => setForm(p => ({ ...p, thumbnail_url: e.target.value || null }))}
                 style={inputStyle}
@@ -213,7 +216,7 @@ function MultimediaPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : media.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay archivos multimedia todavía.</p>
       ) : (

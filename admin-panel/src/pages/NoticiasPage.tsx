@@ -115,7 +115,7 @@ function NoticiasPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nueva noticia</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
@@ -123,24 +123,27 @@ function NoticiasPage() {
             {editingId ? 'Editar noticia' : 'Nueva noticia'}
           </h3>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <Field label="Título">
+            <Field label="Título" htmlFor="news-title">
               <input
+                id="news-title"
                 value={form.title}
                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                 required
                 style={inputStyle}
               />
             </Field>
-            <Field label="Extracto">
+            <Field label="Extracto" htmlFor="news-excerpt">
               <input
+                id="news-excerpt"
                 value={form.excerpt}
                 onChange={e => setForm(p => ({ ...p, excerpt: e.target.value }))}
                 required
                 style={inputStyle}
               />
             </Field>
-            <Field label="Contenido">
+            <Field label="Contenido" htmlFor="news-content">
               <textarea
+                id="news-content"
                 value={form.content}
                 onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
                 required
@@ -148,11 +151,12 @@ function NoticiasPage() {
                 style={{ ...inputStyle, resize: 'vertical' }}
               />
             </Field>
-            <Field label="Imagen">
+            <Field label="Imagen" htmlFor="news-image">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input
                     ref={fileInputRef}
+                    id="news-image"
                     type="file"
                     accept="image/*"
                     onChange={e => setImageFile(e.target.files?.[0] ?? null)}
@@ -200,7 +204,7 @@ function NoticiasPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : news.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay noticias todavía.</p>
       ) : (
@@ -250,10 +254,10 @@ function NoticiasPage() {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )

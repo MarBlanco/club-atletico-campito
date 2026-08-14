@@ -101,27 +101,27 @@ function GalleriesPage() {
         <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nueva galería</button>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar galería' : 'Nueva galería'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            <Field label="Título" style={{ gridColumn: '1 / -1' }}>
-              <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required style={inputStyle} />
+<form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
+            <Field label="Título" htmlFor="gallery-title" style={{ gridColumn: '1 / -1' }}>
+              <input id="gallery-title" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="Categoría">
-              <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as GalleryCategory }))} style={inputStyle}>
+            <Field label="Categoría" htmlFor="gallery-category">
+              <select id="gallery-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as GalleryCategory }))} style={inputStyle}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
               </select>
             </Field>
-            <Field label="Fecha del partido">
-              <input type="date" value={form.match_date} onChange={e => setForm(p => ({ ...p, match_date: e.target.value }))} required style={inputStyle} />
+            <Field label="Fecha del partido" htmlFor="gallery-date">
+              <input id="gallery-date" type="date" value={form.match_date} onChange={e => setForm(p => ({ ...p, match_date: e.target.value }))} required style={inputStyle} />
             </Field>
-            <Field label="URL imagen de portada" style={{ gridColumn: '1 / -1' }}>
-              <input value={form.cover_image} onChange={e => setForm(p => ({ ...p, cover_image: e.target.value }))} required style={inputStyle} />
+            <Field label="URL imagen de portada" htmlFor="gallery-cover" style={{ gridColumn: '1 / -1' }}>
+              <input id="gallery-cover" value={form.cover_image} onChange={e => setForm(p => ({ ...p, cover_image: e.target.value }))} required style={inputStyle} />
             </Field>
             {form.cover_image && (
               <div style={{ gridColumn: '1 / -1' }}>
@@ -143,7 +143,7 @@ function GalleriesPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>Cargando...</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : galleries.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay galerías todavía.</p>
       ) : (
@@ -200,10 +200,10 @@ function GalleriesPage() {
   )
 }
 
-function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: React.CSSProperties }) {
+function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...style }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
       {children}
     </div>
   )
