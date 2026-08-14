@@ -125,37 +125,33 @@ function ContactPage() {
         </p>
       </div>
 
+      <h2 style={styles.sectionTitle}>Ubicación</h2>
       {loading ? (
         <p style={styles.status}>Cargando contacto...</p>
       ) : error ? (
         <p style={styles.status}>{error}</p>
+      ) : !club ? (
+        <div style={styles.empty}>
+          El club no tiene información cargada todavía.
+        </div>
       ) : (
-        <>
-          <h2 style={styles.sectionTitle}>Ubicación</h2>
-          {!club ? (
-            <div style={styles.empty}>
-              El club no tiene información cargada todavía.
-            </div>
-          ) : (
-            <div style={styles.grid}>
-              <article style={styles.card}>
-                <p style={styles.cardLabel}>Ubicación</p>
-                <p style={styles.cardValue}>{club.location}</p>
-              </article>
-            </div>
-          )}
-
-          <h2 style={styles.sectionTitle}>Otros medios</h2>
-          <div style={styles.grid}>
-            {MOCK_CONTACT_ITEMS.map(item => (
-              <article key={item.label} style={styles.card}>
-                <p style={styles.cardLabel}>{item.label}</p>
-                <p style={styles.cardValue}>{item.value}</p>
-              </article>
-            ))}
-          </div>
-        </>
+        <div style={styles.grid}>
+          <article style={styles.card}>
+            <p style={styles.cardLabel}>Ubicación</p>
+            <p style={styles.cardValue}>{club.location}</p>
+          </article>
+        </div>
       )}
+
+      <h2 style={styles.sectionTitle}>Otros medios</h2>
+      <div style={styles.grid}>
+        {MOCK_CONTACT_ITEMS.map(item => (
+          <article key={item.label} style={styles.card}>
+            <p style={styles.cardLabel}>{item.label}</p>
+            <p style={styles.cardValue}>{item.value}</p>
+          </article>
+        ))}
+      </div>
     </div>
   )
 }
