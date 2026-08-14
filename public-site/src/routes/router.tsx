@@ -1,15 +1,18 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import PublicLayout from '../layouts/PublicLayout'
 import HomePage from '../pages/HomePage'
-import ClubPage from '../pages/ClubPage'
-import TeamsPage from '../pages/TeamsPage'
-import FirstTeamPage from '../pages/FirstTeamPage'
-import NewsPage from '../pages/NewsPage'
-import NewsDetailPage from '../pages/NewsDetailPage'
-import FixturePage from '../pages/FixturePage'
-import MultimediaPage from '../pages/MultimediaPage'
-import CommunityPage from '../pages/CommunityPage'
-import ContactPage from '../pages/ContactPage'
+
+const ClubPage = lazy(() => import('../pages/ClubPage'))
+const TeamsPage = lazy(() => import('../pages/TeamsPage'))
+const FirstTeamPage = lazy(() => import('../pages/FirstTeamPage'))
+const NewsPage = lazy(() => import('../pages/NewsPage'))
+const NewsDetailPage = lazy(() => import('../pages/NewsDetailPage'))
+const FixturePage = lazy(() => import('../pages/FixturePage'))
+const MultimediaPage = lazy(() => import('../pages/MultimediaPage'))
+const CommunityPage = lazy(() => import('../pages/CommunityPage'))
+const ContactPage = lazy(() => import('../pages/ContactPage'))
 
 const router = createBrowserRouter([
   {

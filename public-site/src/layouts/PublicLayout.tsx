@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { useIsMobile } from '../hooks/useMediaQuery'
 
@@ -197,8 +197,10 @@ function PublicLayout() {
         )}
       </header>
 
-      <main style={{ ...styles.main, padding: isMobile ? '24px 16px' : '32px 24px' }}>
-        <Outlet />
+<main style={{ ...styles.main, padding: isMobile ? '24px 16px' : '32px 24px' }}>
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer style={styles.footer}>
@@ -211,3 +213,11 @@ function PublicLayout() {
 }
 
 export default PublicLayout
+
+function PageFallback() {
+  return (
+    <div style={{ padding: '64px 24px', textAlign: 'center' as const, color: '#6b7280', fontSize: 14 }}>
+      Cargando...
+    </div>
+  )
+}

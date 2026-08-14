@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useIsMobile } from '../hooks/useMediaQuery'
@@ -222,7 +222,9 @@ function AdminLayout() {
           <span style={styles.topbarTitle}>Club Campito CMS</span>
         </header>
         <main style={{ ...styles.content, padding: isMobile ? 16 : 32 }}>
-          <Outlet />
+          <Suspense fallback={<PageFallback />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
@@ -230,3 +232,11 @@ function AdminLayout() {
 }
 
 export default AdminLayout
+
+function PageFallback() {
+  return (
+    <div style={{ padding: 48, textAlign: 'center' as const, color: '#6b7280', fontSize: 14 }}>
+      Cargando...
+    </div>
+  )
+}

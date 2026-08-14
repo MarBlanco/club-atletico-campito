@@ -154,6 +154,8 @@ function CommunityPage() {
               <img
                 src={gallery.cover_image}
                 alt={gallery.title}
+                loading="lazy"
+                decoding="async"
                 style={styles.cover}
               />
               <div style={styles.body}>
