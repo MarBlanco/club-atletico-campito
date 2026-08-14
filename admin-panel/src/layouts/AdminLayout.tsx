@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useIsMobile } from '../hooks/useMediaQuery'
+import { useAuth } from '../context/AuthContext'
 
 const SIDEBAR_WIDTH = 220
 
@@ -144,12 +145,16 @@ const navItems = [
   { to: '/fixture', label: 'Fixture' },
   { to: '/galerias', label: 'Galerías' },
   { to: '/multimedia', label: 'Multimedia' },
+  { to: '/usuarios', label: 'Usuarios', adminOnly: true },
 ]
 
 function AdminLayout() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
+  const { role } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const visibleNav = navItems.filter(item => (item.adminOnly ? role === 'admin' : true))
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -185,7 +190,7 @@ function AdminLayout() {
       >
         <div style={styles.sidebarTitle}>Campito CMS</div>
         <nav style={styles.nav}>
-          {navItems.map(({ to, label }) => (
+          {visibleNav.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
