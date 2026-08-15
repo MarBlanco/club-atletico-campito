@@ -184,7 +184,7 @@ async function handle(req: Request): Promise<Response> {
         }
 
         const { error } = await supabase.auth.admin.updateUserById(id, {
-          ban_duration: banned ? '876000 hours' : 'none',
+          ban_duration: banned ? '876000h' : 'none',
         })
         if (error) return json({ error: error.message }, 400)
         return json({ ok: true })
