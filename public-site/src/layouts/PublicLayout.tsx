@@ -131,7 +131,7 @@ const navItems = [
   { to: '/noticias', label: 'Noticias' },
   { to: '/fixture', label: 'Fixture' },
   { to: '/multimedia', label: 'Multimedia' },
-  { to: '/comunidad', label: 'Comunidad' },
+  { to: '/momentos', label: 'Momentos Campito' },
   { to: '/contacto', label: 'Contacto' },
 ]
 

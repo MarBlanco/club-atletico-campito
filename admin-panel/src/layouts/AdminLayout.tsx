@@ -140,11 +140,11 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/club', label: 'Club' },
   { to: '/noticias', label: 'Noticias' },
+  { to: '/staff', label: 'People' },
   { to: '/jugadores', label: 'Jugadores' },
-  { to: '/staff', label: 'Staff' },
   { to: '/fixture', label: 'Fixture' },
-  { to: '/galerias', label: 'Galerías' },
   { to: '/multimedia', label: 'Multimedia' },
+  { to: '/galerias', label: 'Momentos Campito' },
   { to: '/usuarios', label: 'Usuarios', adminOnly: true },
   { to: '/configuracion', label: 'Configuración', adminOnly: true },
 ]
