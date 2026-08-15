@@ -54,7 +54,7 @@ BEGIN
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'role', 'colaborador')
+    'colaborador'
   );
   RETURN NEW;
 END;
