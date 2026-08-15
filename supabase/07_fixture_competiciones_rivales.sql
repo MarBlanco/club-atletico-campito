@@ -5,6 +5,34 @@
 -- RLS: competiciones y rivales — lectura pública, escritura admin
 -- ============================================================
 
+-- Helpers de rol (idénticos a los de 05_rls.sql).
+-- Se recrean con CREATE OR REPLACE para que esta migración sea
+-- aplicable de forma independiente, incluso si 05_rls.sql aún no
+-- se ejecutó en la instancia.
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users u
+    WHERE u.id = auth.uid() AND u.role = 'admin'
+  )
+$$;
+
+CREATE OR REPLACE FUNCTION public.can_manage_content()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users u
+    WHERE u.id = auth.uid() AND u.role IN ('admin', 'colaborador')
+  )
+$$;
+
 -- ------------------------------------------------------------
 -- COMPETITIONS
 -- Competiciones administrables (liga, copa, amistoso, ...)

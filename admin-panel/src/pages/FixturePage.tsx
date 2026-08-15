@@ -69,6 +69,7 @@ function FixturePage() {
   const [rivals, setRivals] = useState<Rival[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [referenceError, setReferenceError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   const [showForm, setShowForm] = useState(false)
@@ -80,15 +81,37 @@ function FixturePage() {
   const [manager, setManager] = useState<ManagerKind | null>(null)
 
   useEffect(() => {
-    Promise.all([getMatches(), getCompetitions(), getRivals()])
-      .then(([m, c, r]) => {
+    let active = true
+
+    getMatches()
+      .then(m => {
+        if (!active) return
         setMatches(m)
-        setCompetitions(c)
-        setRivals(r)
         setError(null)
       })
-      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar fixture'))
-      .finally(() => setLoading(false))
+      .catch(e => {
+        if (!active) return
+        setError(e instanceof Error ? e.message : 'Error al cargar fixture')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    Promise.all([getCompetitions(), getRivals()])
+      .then(([c, r]) => {
+        if (!active) return
+        setCompetitions(c)
+        setRivals(r)
+        setReferenceError(null)
+      })
+      .catch(e => {
+        if (!active) return
+        setReferenceError(e instanceof Error ? e.message : 'Error al cargar competiciones y rivales')
+      })
+
+    return () => {
+      active = false
+    }
   }, [refreshKey])
 
   function reload() {
@@ -243,27 +266,19 @@ function FixturePage() {
 
       {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
+      {referenceError && (
+        <p style={{ color: '#b45309', marginBottom: 16, fontSize: 13 }} role="alert">
+          {referenceError}
+        </p>
+      )}
+
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
             {editingId ? 'Editar partido' : 'Nuevo partido'}
           </h3>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            <Field label="Rival" htmlFor="match-rival">
-              <Select id="match-rival" value={form.rival_id} onChange={e => setForm(p => ({ ...p, rival_id: e.target.value }))} required>
-                <option value="" disabled>Seleccioná un rival</option>
-                {rivals.map(r => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
-                ))}
-              </Select>
-              {isAdmin && (
-                <button type="button" onClick={() => setManager('rival')} style={linkBtnStyle()}>+ Nuevo rival</button>
-              )}
-            </Field>
-            <Field label="Fecha y hora" htmlFor="match-date">
-              <Input id="match-date" type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
-            </Field>
-            <Field label="Competición" htmlFor="match-competition">
+            <Field label="Competición" htmlFor="match-competition" emphasis>
               <Select id="match-competition" value={form.competition_id} onChange={e => setForm(p => ({ ...p, competition_id: e.target.value }))} required>
                 <option value="" disabled>Seleccioná una competición</option>
                 {competitions.map(c => (
@@ -272,6 +287,20 @@ function FixturePage() {
               </Select>
               {isAdmin && (
                 <button type="button" onClick={() => setManager('competition')} style={linkBtnStyle()}>+ Nueva competición</button>
+              )}
+            </Field>
+            <Field label="Fecha y hora" htmlFor="match-date">
+              <Input id="match-date" type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
+            </Field>
+            <Field label="Rival" htmlFor="match-rival" emphasis>
+              <Select id="match-rival" value={form.rival_id} onChange={e => setForm(p => ({ ...p, rival_id: e.target.value }))} required>
+                <option value="" disabled>Seleccioná un rival</option>
+                {rivals.map(r => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </Select>
+              {isAdmin && (
+                <button type="button" onClick={() => setManager('rival')} style={linkBtnStyle()}>+ Nuevo rival</button>
               )}
             </Field>
             <Field label="Estado" htmlFor="match-status">
@@ -301,7 +330,7 @@ function FixturePage() {
 
       {loading ? (
         <LoadingState />
-      ) : matches.length === 0 ? (
+      ) : error ? null : matches.length === 0 ? (
         <EmptyState message="No hay partidos todavía." />
       ) : (
         <DataTable
@@ -369,10 +398,25 @@ function FixturePage() {
   )
 }
 
-function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children, emphasis = false }: { label: string; htmlFor?: string; children: React.ReactNode; emphasis?: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label htmlFor={htmlFor} style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{label}</label>
+      <label
+        htmlFor={htmlFor}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontSize: emphasis ? 14 : 13,
+          fontWeight: emphasis ? 700 : 500,
+          color: emphasis ? '#1a1a2e' : '#374151',
+        }}
+      >
+        {emphasis && (
+          <span style={{ width: 3, height: 14, background: '#1d4ed8', borderRadius: 2, flexShrink: 0 }} />
+        )}
+        {label}
+      </label>
       {children}
     </div>
   )
