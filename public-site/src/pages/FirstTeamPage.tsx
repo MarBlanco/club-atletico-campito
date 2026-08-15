@@ -1,20 +1,7 @@
+import { useEffect, useState } from 'react'
+import type { Player } from '../types/player'
+import { getPlayers } from '../services/playersService'
 import PlayerCard from '../components/content/PlayerCard'
-
-interface Player {
-  name: string
-  surname: string
-  number: number | null
-  position: string
-}
-
-// Mock genérico y aislado: reemplazar cuando exista un servicio/tipo real de jugadores.
-const MOCK_PLAYERS: Player[] = [
-  { name: 'Jugador', surname: 'Uno', number: 1, position: 'Arquero' },
-  { name: 'Jugador', surname: 'Dos', number: 4, position: 'Defensor' },
-  { name: 'Jugador', surname: 'Tres', number: 10, position: 'Mediocampista' },
-  { name: 'Jugador', surname: 'Cuatro', number: 9, position: 'Delantero' },
-]
-
 import SectionHeader from '../components/content/SectionHeader'
 
 const styles = {
@@ -78,6 +65,27 @@ const styles = {
 }
 
 function FirstTeamPage() {
+  const [players, setPlayers] = useState<Player[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    getPlayers()
+      .then(data => {
+        if (!active) return
+        setPlayers(data)
+        setError(null)
+      })
+      .catch(e => {
+        if (active) setError(e instanceof Error ? e.message : 'Error al cargar el plantel')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => { active = false }
+  }, [])
+
   return (
     <div>
       <div style={styles.header}>
@@ -93,13 +101,17 @@ function FirstTeamPage() {
       </div>
 
       <SectionHeader title="Plantel" />
-      {MOCK_PLAYERS.length === 0 ? (
+      {error ? (
+        <div style={styles.empty}>{error}</div>
+      ) : loading ? (
+        <div style={styles.empty}>Cargando plantel...</div>
+      ) : players.length === 0 ? (
         <div style={styles.empty}>No hay jugadores cargados todavía.</div>
       ) : (
         <div style={styles.grid}>
-          {MOCK_PLAYERS.map(player => (
+          {players.map(player => (
             <PlayerCard
-              key={`${player.surname}-${player.number}`}
+              key={player.id}
               name={player.name}
               surname={player.surname}
               number={player.number}
