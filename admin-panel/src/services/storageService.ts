@@ -9,11 +9,12 @@ export const BUCKET = 'campito-media'
 export const STORAGE_FOLDERS = ['club', 'news', 'players', 'staff', 'galleries', 'videos'] as const
 export type StorageFolder = typeof STORAGE_FOLDERS[number]
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024   // 5 MB
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100 MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024      // 5 MB
+const MAX_VIDEO_SIZE = 250 * 1024 * 1024    // 250 MB
+const MAX_VIDEO_DURATION = 5 * 60           // 5 minutos
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_VIDEO_TYPES = ['video/mp4']
 
 // ============================================================
 // Tipos de retorno
@@ -44,7 +45,8 @@ async function upload(
   file: File,
   folder: StorageFolder,
   allowedTypes: string[],
-  maxSize: number
+  maxSize: number,
+  validate?: () => Promise<void>
 ): Promise<UploadResult> {
   if (!allowedTypes.includes(file.type)) {
     throw new Error(`Tipo de archivo no permitido: ${file.type}`)
@@ -53,6 +55,7 @@ async function upload(
     const maxMB = Math.round(maxSize / 1024 / 1024)
     throw new Error(`El archivo supera el tamaño máximo de ${maxMB} MB`)
   }
+  if (validate) await validate()
 
   const path = buildPath(folder, file)
 
@@ -75,8 +78,30 @@ export async function uploadImage(file: File, folder: StorageFolder): Promise<Up
   return upload(file, folder, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE)
 }
 
+export function getVideoDuration(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url)
+      resolve(video.duration)
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('No se pudo leer el video'))
+    }
+    video.src = url
+  })
+}
+
 export async function uploadVideo(file: File, folder: StorageFolder): Promise<UploadResult> {
-  return upload(file, folder, ALLOWED_VIDEO_TYPES, MAX_VIDEO_SIZE)
+  return upload(file, folder, ALLOWED_VIDEO_TYPES, MAX_VIDEO_SIZE, async () => {
+    const duration = await getVideoDuration(file)
+    if (duration > MAX_VIDEO_DURATION) {
+      throw new Error('El video supera la duración máxima de 5 minutos')
+    }
+  })
 }
 
 export async function deleteFile(path: string): Promise<void> {
