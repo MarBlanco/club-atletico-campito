@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import AuthGuard from '../components/common/AuthGuard'
 import RoleGuard from '../components/common/RoleGuard'
@@ -28,6 +28,7 @@ const router = createBrowserRouter([
       {
         element: <AdminLayout />,
         children: [
+          { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/club', element: <ClubPage /> },
           { path: '/noticias', element: <NoticiasPage /> },
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
               </RoleGuard>
             ),
           },
+          { path: '*', element: <Navigate to="/dashboard" replace /> },
         ],
       },
     ],
