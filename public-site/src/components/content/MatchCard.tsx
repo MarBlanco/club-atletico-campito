@@ -3,6 +3,7 @@ import type { Match, MatchStatus } from '../../types/matches'
 const STATUS_LABELS: Record<MatchStatus, string> = {
   upcoming: 'Próximo partido',
   finished: 'Finalizado',
+  suspended: 'Suspendido',
 }
 
 const styles = {

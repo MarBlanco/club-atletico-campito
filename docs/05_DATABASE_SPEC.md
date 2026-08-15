@@ -115,12 +115,56 @@ Fixture.
 ### Fields
 
 - id
-- rival
+- competition_id
+- rival_id
 - date
-- competition
 - status
 - goals_for
 - goals_against
+
+### Statuses
+
+- upcoming (Próximo)
+- finished (Finalizado)
+- suspended (Suspendido)
+
+---
+
+# COMPETITIONS
+
+## Purpose
+
+Competiciones administrables.
+
+### Fields
+
+- id
+- name
+- created_at
+
+### Permissions
+
+- Lectura pública
+- Escritura solo admin
+
+---
+
+# RIVALS
+
+## Purpose
+
+Rivales administrables.
+
+### Fields
+
+- id
+- name
+- created_at
+
+### Permissions
+
+- Lectura pública
+- Escritura solo admin
 
 ---
 
@@ -173,6 +217,12 @@ Gallery
 
 Match
 → Gallery (optional)
+
+Match
+→ Competition
+
+Match
+→ Rival
 
 ---
 
