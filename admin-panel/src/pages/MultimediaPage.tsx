@@ -157,6 +157,7 @@ function MultimediaPage() {
                   folder="videos"
                   value={form.url}
                   onChange={url => setForm(p => ({ ...p, url }))}
+                  onThumbnailChange={thumb => setForm(p => ({ ...p, thumbnail_url: thumb }))}
                 />
               ) : (
                 <ImageUploader
