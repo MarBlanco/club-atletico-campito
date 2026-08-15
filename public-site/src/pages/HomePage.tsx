@@ -10,6 +10,8 @@ import { getClub } from '../services/clubService'
 import { getLatestMedia } from '../services/mediaService'
 import { getLatestGalleries } from '../services/galleriesService'
 import { useIsMobile } from '../hooks/useMediaQuery'
+import GalleryGrid from '../components/media/GalleryGrid'
+import Lightbox from '../components/media/Lightbox'
 
 function HomePage() {
   const isMobile = useIsMobile()
@@ -32,6 +34,8 @@ function HomePage() {
   const [galleries, setGalleries] = useState<Gallery[]>([])
   const [galleriesLoading, setGalleriesLoading] = useState(true)
   const [galleriesError, setGalleriesError] = useState<string | null>(null)
+
+  const [lightbox, setLightbox] = useState<Media | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -383,38 +387,7 @@ function HomePage() {
       whiteSpace: 'pre-line' as const,
     } as React.CSSProperties,
 
-    mediaCard: {
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: 8,
-      overflow: 'hidden',
-      position: 'relative' as const,
-      minHeight: 180,
-      display: 'flex',
-    } as React.CSSProperties,
-
-    mediaThumb: {
-      width: '100%',
-      height: 180,
-      objectFit: 'cover' as const,
-      backgroundColor: '#f3f4f6',
-    } as React.CSSProperties,
-
-    mediaBadge: {
-      position: 'absolute' as const,
-      top: 8,
-      left: 8,
-      padding: '2px 8px',
-      borderRadius: 12,
-      fontSize: 11,
-      fontWeight: 700,
-      textTransform: 'uppercase' as const,
-      letterSpacing: 0.5,
-      backgroundColor: 'rgba(18, 58, 158, 0.9)',
-      color: '#ffffff',
-    } as React.CSSProperties,
-
-    galleryCard: {
+    clubCard: {
       backgroundColor: '#ffffff',
       border: '1px solid #e5e7eb',
       borderRadius: 8,
@@ -495,7 +468,8 @@ function HomePage() {
   ]
 
   return (
-    <div>
+    <>
+      <div>
       <section style={styles.hero}>
         <h1 style={styles.heroTitle}>CLUB ATLÉTICO CAMPITO</h1>
         <p style={styles.heroSubtitle}>
@@ -633,18 +607,7 @@ function HomePage() {
               <p style={styles.placeholderText}>Último contenido</p>
             </div>
           ) : (
-            media.map(item => (
-              <article key={item.id} style={styles.mediaCard}>
-                <img
-                  src={item.thumbnail_url || item.url}
-                  alt={`Multimedia ${item.type}`}
-                  loading="lazy"
-                  decoding="async"
-                  style={styles.mediaThumb}
-                />
-                <span style={styles.mediaBadge}>{item.type}</span>
-              </article>
-            ))
+            <GalleryGrid items={media} onSelect={setLightbox} />
           )}
         </div>
       </section>
@@ -704,6 +667,9 @@ function HomePage() {
         </section>
       ))}
     </div>
+
+    {lightbox && <Lightbox item={lightbox} onClose={() => setLightbox(null)} />}
+    </>
   )
 }
 

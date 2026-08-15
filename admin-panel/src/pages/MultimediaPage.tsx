@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
-import { uploadImage, uploadVideo } from '../services/storageService'
+import ImageUploader from '../components/media/ImageUploader'
+import VideoUploader from '../components/media/VideoUploader'
 
 const TYPE_LABELS: Record<MediaType, string> = {
   image: 'Imagen',
@@ -27,9 +28,6 @@ function MultimediaPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateMediaDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [file, setFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getMedia()
@@ -43,7 +41,6 @@ function MultimediaPage() {
   function openCreate() {
     setEditingId(null)
     setForm(EMPTY_FORM)
-    setFile(null)
     setShowForm(true)
   }
 
@@ -55,7 +52,6 @@ function MultimediaPage() {
       url: m.url,
       thumbnail_url: m.thumbnail_url,
     })
-    setFile(null)
     setShowForm(true)
   }
 
@@ -63,25 +59,6 @@ function MultimediaPage() {
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
-    setFile(null)
-  }
-
-  async function handleUpload() {
-    if (!file) return
-    const targetType = form.type
-    setUploading(true)
-    try {
-      const { publicUrl } = targetType === 'video'
-        ? await uploadVideo(file, 'videos')
-        : await uploadImage(file, 'galleries')
-      setForm(p => (p.type === targetType ? { ...p, url: publicUrl } : p))
-      setFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error al subir archivo')
-    } finally {
-      setUploading(false)
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -149,44 +126,24 @@ function MultimediaPage() {
               />
             </Field>
             <Field label="Archivo" htmlFor="media-file" style={{ gridColumn: '1 / -1' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input
-                    ref={fileInputRef}
-                    id="media-file"
-                    type="file"
-                    accept={form.type === 'video' ? 'video/*' : 'image/*'}
-                    onChange={e => setFile(e.target.files?.[0] ?? null)}
-                    style={{ fontSize: 13, flex: 1 }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={!file || uploading}
-                    style={btnStyle(file && !uploading ? '#059669' : '#9ca3af')}
-                  >
-                    {uploading ? 'Subiendo...' : 'Subir'}
-                  </button>
-                </div>
-                {form.url && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {form.type === 'video' ? (
-                      <video
-                        src={form.url}
-                        controls
-                        style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }}
-                      />
-                    ) : (
-                      <img
-                        src={form.url}
-                        alt="Preview"
-                        style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
-                      />
-                    )}
-                    <span style={{ fontSize: 11, color: '#6b7280', wordBreak: 'break-all' }}>{form.url}</span>
-                  </div>
-                )}
-              </div>
+              {form.type === 'video' ? (
+                <VideoUploader
+                  id="media-file"
+                  folder="videos"
+                  value={form.url}
+                  onChange={url => setForm(p => ({ ...p, url }))}
+                />
+              ) : (
+                <ImageUploader
+                  id="media-file"
+                  folder="galleries"
+                  value={form.url}
+                  onChange={url => setForm(p => ({ ...p, url }))}
+                  onThumbnailChange={thumb => setForm(p => ({ ...p, thumbnail_url: thumb }))}
+                  aspectRatio={16 / 9}
+                  label="Imagen"
+                />
+              )}
             </Field>
             <Field label="URL del archivo" htmlFor="media-url" style={{ gridColumn: '1 / -1' }}>
               <input
