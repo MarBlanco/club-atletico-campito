@@ -40,7 +40,7 @@ function GalleriesPage() {
   useEffect(() => {
     getGalleries()
       .then(data => { setGalleries(data); setError(null) })
-      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar galerías'))
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar momentos'))
       .finally(() => setLoading(false))
   }, [refreshKey])
 
@@ -89,7 +89,7 @@ function GalleriesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar esta galería?')) return
+    if (!window.confirm('¿Eliminar este momento?')) return
     try {
       await deleteGallery(id)
       setGalleries(prev => prev.filter(g => g.id !== id))
@@ -116,8 +116,8 @@ function GalleriesPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a2e', margin: 0 }}>Galerías</h2>
-        <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nueva galería</button>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a2e', margin: 0 }}>Momentos Campito</h2>
+        <button onClick={openCreate} style={btnStyle('#1a1a2e')}>+ Nuevo momento</button>
       </div>
 
       {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
@@ -125,7 +125,7 @@ function GalleriesPage() {
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: '#1a1a2e' }}>
-            {editingId ? 'Editar galería' : 'Nueva galería'}
+            {editingId ? 'Editar momento' : 'Nuevo momento'}
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Título" htmlFor="gallery-title" style={{ gridColumn: '1 / -1' }}>
@@ -179,7 +179,7 @@ function GalleriesPage() {
       {loading ? (
         <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
       ) : galleries.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay galerías todavía.</p>
+        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay momentos todavía.</p>
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
