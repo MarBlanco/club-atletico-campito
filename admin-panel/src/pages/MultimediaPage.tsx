@@ -3,11 +3,23 @@ import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
 import { uploadImage, uploadVideo } from '../services/storageService'
+import DataTable, { type DataTableColumn } from '../components/admin/DataTable'
+import ActionMenu from '../components/admin/ActionMenu'
+import StatusBadge from '../components/admin/StatusBadge'
+import FormActions from '../components/admin/FormActions'
 
 const TYPE_LABELS: Record<MediaType, string> = {
   image: 'Imagen',
   video: 'Video',
 }
+
+const COLUMNS: DataTableColumn[] = [
+  { key: 'type', label: 'Tipo' },
+  { key: 'url', label: 'URL' },
+  { key: 'thumbnail', label: 'Thumbnail' },
+  { key: 'gallery', label: 'Galería' },
+  { key: 'actions', label: 'Acciones', width: 140 },
+]
 
 const EMPTY_FORM: CreateMediaDTO = {
   gallery_id: '',
@@ -205,11 +217,8 @@ function MultimediaPage() {
                 style={inputStyle}
               />
             </Field>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
-              <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
-                {saving ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button type="button" onClick={closeForm} style={btnStyle('#6b7280')}>Cancelar</button>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <FormActions saving={saving} onCancel={closeForm} style={{ gridColumn: '1 / -1', marginTop: 0 }} />
             </div>
           </form>
         </div>
@@ -220,49 +229,27 @@ function MultimediaPage() {
       ) : media.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14 }}>No hay archivos multimedia todavía.</p>
       ) : (
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                <th style={thStyle}>Tipo</th>
-                <th style={thStyle}>URL</th>
-                <th style={thStyle}>Thumbnail</th>
-                <th style={thStyle}>Galería</th>
-                <th style={{ ...thStyle, width: 140 }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {media.map((m, i) => (
-                <tr key={m.id} style={{ borderBottom: i < media.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                  <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: m.type === 'image' ? '#dbeafe' : '#fef3c7',
-                      color: m.type === 'image' ? '#1d4ed8' : '#92400e',
-                    }}>
-                      {TYPE_LABELS[m.type]}
-                    </span>
-                  </td>
-                  <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.url)}</td>
-                  <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{m.thumbnail_url ? truncate(m.thumbnail_url) : '—'}</td>
-                  <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.gallery_id, 20)}</td>
-                  <td style={tdStyle}>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={() => openEdit(m)} style={btnSmall('#3b82f6')}>Editar</button>
-                      <button onClick={() => handleDelete(m.id)} style={btnSmall('#ef4444')}>Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </div>
+        <DataTable
+          columns={COLUMNS}
+          rows={media}
+          keyField={m => m.id}
+          renderCell={(m, column) => {
+            switch (column.key) {
+              case 'type':
+                return <StatusBadge label={TYPE_LABELS[m.type]} tone={m.type === 'image' ? 'blue' : 'amber'} />
+              case 'url':
+                return <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.url)}</span>
+              case 'thumbnail':
+                return <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{m.thumbnail_url ? truncate(m.thumbnail_url) : '—'}</span>
+              case 'gallery':
+                return <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.gallery_id, 20)}</span>
+              case 'actions':
+                return <ActionMenu onEdit={() => openEdit(m)} onDelete={() => handleDelete(m.id)} />
+              default:
+                return null
+            }
+          }}
+        />
       )}
     </div>
   )
@@ -285,30 +272,6 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
   width: '100%',
   boxSizing: 'border-box',
-}
-
-const thStyle: React.CSSProperties = {
-  padding: '11px 16px',
-  textAlign: 'left',
-  fontSize: 12,
-  fontWeight: 600,
-  color: '#6b7280',
-  textTransform: 'uppercase',
-  letterSpacing: 0.5,
-}
-
-const tdStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  color: '#374151',
-  verticalAlign: 'middle',
-}
-
-function btnStyle(bg: string): React.CSSProperties {
-  return { padding: '9px 18px', background: bg, color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-}
-
-function btnSmall(bg: string): React.CSSProperties {
-  return { padding: '5px 12px', background: bg, color: '#fff', border: 'none', borderRadius: 5, fontSize: 12, fontWeight: 600, cursor: 'pointer' }
 }
 
 export default MultimediaPage

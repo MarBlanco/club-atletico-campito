@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import type { Club, UpdateClubDTO } from '../types/club'
 import { getClub, updateClub } from '../services/clubService'
 import { uploadImage } from '../services/storageService'
+import FormActions from '../components/admin/FormActions'
 
 function ClubPage() {
   const [club, setClub] = useState<Club | null>(null)
@@ -172,11 +173,7 @@ function ClubPage() {
               )}
             </div>
           </Field>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="submit" disabled={saving || uploading} style={btnStyle('#1a1a2e')}>
-              {saving ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
+          <FormActions saving={saving} disabled={uploading} style={{ marginTop: 8 }} />
         </form>
       </div>
     </div>
@@ -206,19 +203,6 @@ const inputStyle: React.CSSProperties = {
 const textareaStyle: React.CSSProperties = {
   ...inputStyle,
   resize: 'vertical',
-}
-
-function btnStyle(bg: string): React.CSSProperties {
-  return {
-    padding: '9px 18px',
-    background: bg,
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: 'pointer',
-  }
 }
 
 export default ClubPage
