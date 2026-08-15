@@ -155,7 +155,7 @@ function MultimediaPage() {
                     ref={fileInputRef}
                     id="media-file"
                     type="file"
-                    accept={form.type === 'video' ? 'video/*' : 'image/*'}
+                    accept={form.type === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp'}
                     onChange={e => setFile(e.target.files?.[0] ?? null)}
                     style={{ fontSize: 13, flex: 1 }}
                   />
