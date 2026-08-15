@@ -37,7 +37,9 @@ const EMPTY_FORM: CreateMatchDTO = {
 
 function toDatetimeLocal(iso: string) {
   if (!iso) return ''
-  return iso.slice(0, 16)
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function FixturePage() {
@@ -107,6 +109,7 @@ const [formError, setFormError] = useState<string | null>(null)
     }
     const dto: CreateMatchDTO = {
       ...form,
+      date: form.date ? new Date(form.date).toISOString() : '',
       goals_for: form.status === 'upcoming' ? null : form.goals_for,
       goals_against: form.status === 'upcoming' ? null : form.goals_against,
     }
