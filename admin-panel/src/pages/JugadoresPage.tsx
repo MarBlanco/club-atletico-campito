@@ -3,6 +3,12 @@ import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Player, CreatePlayerDTO, UpdatePlayerDTO } from '../types/players'
 import type { Position } from '../types/players'
 import { getPlayers, createPlayer, updatePlayer, deletePlayer } from '../services/playersService'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const POSITIONS: Position[] = ['Arquero', 'Defensor', 'Mediocampista', 'Delantero']
 
@@ -26,6 +32,7 @@ function JugadoresPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreatePlayerDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -81,11 +88,16 @@ function JugadoresPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar este jugador?')) return
+  function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deletePlayer(id)
-      setPlayers(prev => prev.filter(p => p.id !== id))
+      await deletePlayer(confirmId)
+      setPlayers(prev => prev.filter(p => p.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -107,21 +119,21 @@ function JugadoresPage() {
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Nombre" htmlFor="player-name">
-              <input id="player-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
+              <Input id="player-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
             </Field>
             <Field label="Apellido" htmlFor="player-surname">
-              <input id="player-surname" value={form.surname} onChange={e => setForm(p => ({ ...p, surname: e.target.value }))} required style={inputStyle} />
+              <Input id="player-surname" value={form.surname} onChange={e => setForm(p => ({ ...p, surname: e.target.value }))} required />
             </Field>
             <Field label="Número" htmlFor="player-number">
-              <input id="player-number" type="number" min={0} max={99} value={form.number} onChange={e => setForm(p => ({ ...p, number: Number(e.target.value) }))} required style={inputStyle} />
+              <Input id="player-number" type="number" min={0} max={99} value={form.number} onChange={e => setForm(p => ({ ...p, number: Number(e.target.value) }))} required />
             </Field>
             <Field label="Posición" htmlFor="player-position">
-              <select id="player-position" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value as Position }))} style={inputStyle}>
+              <Select id="player-position" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value as Position }))}>
                 {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
-              </select>
+              </Select>
             </Field>
             <Field label="URL de imagen" htmlFor="player-image" style={{ gridColumn: '1 / -1' }}>
-              <input id="player-image" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} required style={inputStyle} />
+              <Input id="player-image" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} required />
             </Field>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
@@ -140,9 +152,9 @@ function JugadoresPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : players.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay jugadores todavía.</p>
+        <EmptyState message="No hay jugadores todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -165,17 +177,9 @@ function JugadoresPage() {
                   <td style={tdStyle}>{p.name}</td>
                   <td style={tdStyle}>{p.position}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: p.active ? '#dcfce7' : '#f3f4f6',
-                      color: p.active ? '#16a34a' : '#6b7280',
-                    }}>
+                    <Badge variant={p.active ? 'green' : 'gray'}>
                       {p.active ? 'Activo' : 'Inactivo'}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -190,6 +194,15 @@ function JugadoresPage() {
           </div>
         </div>
       )}
+
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar jugador"
+          message="¿Eliminar este jugador?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
+        />
+      )}
     </div>
   )
 }
@@ -201,16 +214,6 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {

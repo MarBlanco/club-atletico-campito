@@ -2,6 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import type { Club, UpdateClubDTO } from '../types/club'
 import { getClub, updateClub } from '../services/clubService'
 import { uploadImage } from '../services/storageService'
+import Input from '../components/ui/Input'
+import Textarea from '../components/ui/Textarea'
+import LoadingState from '../components/ui/LoadingState'
 
 function ClubPage() {
   const [club, setClub] = useState<Club | null>(null)
@@ -78,7 +81,7 @@ function ClubPage() {
   }
 
   if (loading) {
-    return <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+    return <LoadingState />
   }
 
   if (!club) {
@@ -104,40 +107,36 @@ function ClubPage() {
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24 }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Field label="Historia" htmlFor="club-history">
-            <textarea
+            <Textarea
               id="club-history"
               value={form.history ?? ''}
               onChange={e => setForm(p => ({ ...p, history: e.target.value }))}
               required
               rows={6}
-              style={textareaStyle}
             />
           </Field>
           <Field label="Misión" htmlFor="club-mission">
-            <textarea
+            <Textarea
               id="club-mission"
               value={form.mission ?? ''}
               onChange={e => setForm(p => ({ ...p, mission: e.target.value || null }))}
               rows={4}
-              style={textareaStyle}
             />
           </Field>
           <Field label="Valores" htmlFor="club-values">
-            <textarea
+            <Textarea
               id="club-values"
               value={form.values ?? ''}
               onChange={e => setForm(p => ({ ...p, values: e.target.value || null }))}
               rows={4}
-              style={textareaStyle}
             />
           </Field>
           <Field label="Ubicación" htmlFor="club-location">
-            <input
+            <Input
               id="club-location"
               value={form.location ?? ''}
               onChange={e => setForm(p => ({ ...p, location: e.target.value }))}
               required
-              style={inputStyle}
             />
           </Field>
           <Field label="Logo" htmlFor="club-logo">
@@ -190,22 +189,6 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; 
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
-  fontFamily: 'inherit',
-}
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: 'vertical',
 }
 
 function btnStyle(bg: string): React.CSSProperties {

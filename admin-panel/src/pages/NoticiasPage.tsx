@@ -2,6 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import type { News, CreateNewsDTO, UpdateNewsDTO } from '../types/news'
 import { getNews, createNews, updateNews, deleteNews } from '../services/newsService'
 import { uploadImage } from '../services/storageService'
+import Input from '../components/ui/Input'
+import Textarea from '../components/ui/Textarea'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const EMPTY_FORM: CreateNewsDTO = {
   title: '',
@@ -25,6 +31,7 @@ function NoticiasPage() {
   const [saving, setSaving] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -98,11 +105,16 @@ function NoticiasPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar esta noticia?')) return
+  function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deleteNews(id)
-      setNews(prev => prev.filter(n => n.id !== id))
+      await deleteNews(confirmId)
+      setNews(prev => prev.filter(n => n.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -124,31 +136,28 @@ function NoticiasPage() {
           </h3>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <Field label="Título" htmlFor="news-title">
-              <input
+              <Input
                 id="news-title"
                 value={form.title}
                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                 required
-                style={inputStyle}
               />
             </Field>
             <Field label="Extracto" htmlFor="news-excerpt">
-              <input
+              <Input
                 id="news-excerpt"
                 value={form.excerpt}
                 onChange={e => setForm(p => ({ ...p, excerpt: e.target.value }))}
                 required
-                style={inputStyle}
               />
             </Field>
             <Field label="Contenido" htmlFor="news-content">
-              <textarea
+              <Textarea
                 id="news-content"
                 value={form.content}
                 onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
                 required
                 rows={5}
-                style={{ ...inputStyle, resize: 'vertical' }}
               />
             </Field>
             <Field label="Imagen" htmlFor="news-image">
@@ -204,9 +213,9 @@ function NoticiasPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : news.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay noticias todavía.</p>
+        <EmptyState message="No hay noticias todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -225,17 +234,9 @@ function NoticiasPage() {
                   <td style={tdStyle}>{item.title}</td>
                   <td style={tdStyle}>{new Date(item.created_at).toLocaleDateString('es-AR')}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: item.published ? '#dcfce7' : '#f3f4f6',
-                      color: item.published ? '#16a34a' : '#6b7280',
-                    }}>
+                    <Badge variant={item.published ? 'green' : 'gray'}>
                       {item.published ? 'Publicada' : 'Borrador'}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -250,6 +251,15 @@ function NoticiasPage() {
           </div>
         </div>
       )}
+
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar noticia"
+          message="¿Eliminar esta noticia?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
+        />
+      )}
     </div>
   )
 }
@@ -261,16 +271,6 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; 
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {

@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Match, CreateMatchDTO, UpdateMatchDTO, MatchStatus } from '../types/matches'
 import { getMatches, createMatch, updateMatch, deleteMatch } from '../services/matchesService'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const STATUS_LABELS: Record<MatchStatus, string> = {
   upcoming: 'Próximo',
@@ -33,6 +39,7 @@ function FixturePage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateMatchDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     getMatches()
@@ -87,11 +94,16 @@ function FixturePage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar este partido?')) return
+  function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deleteMatch(id)
-      setMatches(prev => prev.filter(m => m.id !== id))
+      await deleteMatch(confirmId)
+      setMatches(prev => prev.filter(m => m.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -124,38 +136,36 @@ function FixturePage() {
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Rival" htmlFor="match-rival">
-              <input id="match-rival" value={form.rival} onChange={e => setForm(p => ({ ...p, rival: e.target.value }))} required style={inputStyle} />
+              <Input id="match-rival" value={form.rival} onChange={e => setForm(p => ({ ...p, rival: e.target.value }))} required />
             </Field>
             <Field label="Fecha y hora" htmlFor="match-date">
-              <input id="match-date" type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required style={inputStyle} />
+              <Input id="match-date" type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
             </Field>
             <Field label="Competición" htmlFor="match-competition">
-              <input id="match-competition" value={form.competition} onChange={e => setForm(p => ({ ...p, competition: e.target.value }))} required style={inputStyle} />
+              <Input id="match-competition" value={form.competition} onChange={e => setForm(p => ({ ...p, competition: e.target.value }))} required />
             </Field>
             <Field label="Estado" htmlFor="match-status">
-              <select id="match-status" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as MatchStatus }))} style={inputStyle}>
+              <Select id="match-status" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as MatchStatus }))}>
                 <option value="upcoming">Próximo</option>
                 <option value="finished">Finalizado</option>
-              </select>
+              </Select>
             </Field>
             <Field label="Goles a favor" htmlFor="match-goals-for">
-              <input
+              <Input
                 id="match-goals-for"
                 type="number"
                 min={0}
                 value={form.goals_for ?? ''}
                 onChange={e => setForm(p => ({ ...p, goals_for: e.target.value === '' ? null : Number(e.target.value) }))}
-                style={inputStyle}
               />
             </Field>
             <Field label="Goles en contra" htmlFor="match-goals-against">
-              <input
+              <Input
                 id="match-goals-against"
                 type="number"
                 min={0}
                 value={form.goals_against ?? ''}
                 onChange={e => setForm(p => ({ ...p, goals_against: e.target.value === '' ? null : Number(e.target.value) }))}
-                style={inputStyle}
               />
             </Field>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
@@ -169,9 +179,9 @@ function FixturePage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : matches.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay partidos todavía.</p>
+        <EmptyState message="No hay partidos todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -193,17 +203,9 @@ function FixturePage() {
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{m.rival}</td>
                   <td style={tdStyle}>{m.competition}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: m.status === 'finished' ? '#f3f4f6' : '#dbeafe',
-                      color: m.status === 'finished' ? '#6b7280' : '#1d4ed8',
-                    }}>
+                    <Badge variant={m.status === 'finished' ? 'gray' : 'blue'}>
                       {STATUS_LABELS[m.status]}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{formatResult(m)}</td>
                   <td style={tdStyle}>
@@ -219,6 +221,15 @@ function FixturePage() {
           </div>
         </div>
       )}
+
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar partido"
+          message="¿Eliminar este partido?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
+        />
+      )}
     </div>
   )
 }
@@ -230,16 +241,6 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; 
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {
