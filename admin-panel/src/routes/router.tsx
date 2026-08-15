@@ -29,7 +29,14 @@ const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
-          { path: '/club', element: <ClubPage /> },
+          {
+            path: '/club',
+            element: (
+              <RoleGuard>
+                <ClubPage />
+              </RoleGuard>
+            ),
+          },
           { path: '/noticias', element: <NoticiasPage /> },
           { path: '/jugadores', element: <JugadoresPage /> },
           { path: '/staff', element: <StaffPage /> },

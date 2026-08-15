@@ -37,7 +37,7 @@ const styles = {
 
 const navItems: (SidebarItem & { adminOnly?: boolean })[] = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/club', label: 'Club' },
+  { to: '/club', label: 'Club', adminOnly: true },
   { to: '/noticias', label: 'Noticias' },
   { to: '/staff', label: 'People' },
   { to: '/jugadores', label: 'Jugadores' },
