@@ -1,30 +1,30 @@
 import type { ID } from './common'
 
-export type MatchStatus = 'upcoming' | 'finished'
+export type MatchStatus = 'upcoming' | 'finished' | 'suspended'
 
 export interface Match {
   id: ID
-  rival: string
+  competition_id: ID
+  rival_id: ID
   date: string
-  competition: string
   status: MatchStatus
   goals_for: number | null
   goals_against: number | null
 }
 
 export interface CreateMatchDTO {
-  rival: string
+  competition_id: ID
+  rival_id: ID
   date: string
-  competition: string
   status: MatchStatus
   goals_for: number | null
   goals_against: number | null
 }
 
 export interface UpdateMatchDTO {
-  rival?: string
+  competition_id?: ID
+  rival_id?: ID
   date?: string
-  competition?: string
   status?: MatchStatus
   goals_for?: number | null
   goals_against?: number | null

@@ -15,6 +15,16 @@ function mockFrom(result: { data?: unknown; error?: unknown }) {
   return from
 }
 
+const rawRow = {
+  id: 'match-1',
+  date: '2026-03-01T20:00:00.000Z',
+  status: 'upcoming',
+  goals_for: null,
+  goals_against: null,
+  competitions: { name: 'Liga' },
+  rivals: { name: 'River' },
+}
+
 const row: Match = {
   id: 'match-1',
   rival: 'River',
@@ -30,10 +40,11 @@ beforeEach(() => {
 })
 
 describe('public matchesService', () => {
-  it('getNextMatch filtra por status upcoming y limita a 1', async () => {
-    const from = mockFrom({ data: row })
+  it('getNextMatch filtra por status upcoming, limita a 1 y resuelve nombres por relación', async () => {
+    const from = mockFrom({ data: rawRow })
     await expect(getNextMatch()).resolves.toEqual(row)
     expect(supabase.from).toHaveBeenCalledWith('matches')
+    expect(from().select).toHaveBeenCalledWith('*, competitions(name), rivals(name)')
     expect(from().eq).toHaveBeenCalledWith('status', 'upcoming')
     expect(from().limit).toHaveBeenCalledWith(1)
     expect(from().maybeSingle).toHaveBeenCalled()
@@ -50,8 +61,8 @@ describe('public matchesService', () => {
     await expect(getNextMatch()).rejects.toEqual(error)
   })
 
-  it('getMatches devuelve las filas', async () => {
-    const from = mockFrom({ data: [row] })
+  it('getMatches devuelve las filas con nombres resueltos', async () => {
+    const from = mockFrom({ data: [rawRow] })
     await expect(getMatches()).resolves.toEqual([row])
     expect(supabase.from).toHaveBeenCalledWith('matches')
     expect(from().order).toHaveBeenCalledWith('date', { ascending: true })

@@ -111,10 +111,11 @@ Administrar:
 
 Administrar:
 
-- rival
+- rival (select; solo Admin crea/edita/elimina rivales)
+- competición (select; solo Admin crea/edita/elimina competiciones)
 - fecha
-- resultado
-- estado
+- resultado (contador de goles)
+- estado (próximo / finalizado / suspendido)
 
 ---
 

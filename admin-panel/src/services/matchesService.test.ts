@@ -17,9 +17,9 @@ function mockFrom(result: { data?: unknown; error?: unknown }) {
 
 const row: Match = {
   id: 'match-1',
-  rival: 'River',
+  rival_id: 'rival-1',
   date: '2026-03-01T20:00:00.000Z',
-  competition: 'Liga',
+  competition_id: 'comp-1',
   status: 'upcoming',
   goals_for: null,
   goals_against: null,
@@ -51,7 +51,7 @@ describe('matchesService', () => {
   })
 
   it('createMatch inserta el dto y devuelve la fila creada', async () => {
-    const dto = { rival: 'Boca', date: '2026-04-01', competition: 'Liga', status: 'upcoming' as const, goals_for: null, goals_against: null }
+    const dto = { rival_id: 'rival-2', date: '2026-04-01', competition_id: 'comp-2', status: 'upcoming' as const, goals_for: null, goals_against: null }
     const from = mockFrom({ data: row })
     await expect(createMatch(dto)).resolves.toEqual(row)
     expect(from().insert).toHaveBeenCalledWith(dto)
@@ -62,6 +62,12 @@ describe('matchesService', () => {
     await expect(updateMatch('match-1', { status: 'finished', goals_for: 2, goals_against: 1 })).resolves.toEqual(row)
     expect(from().update).toHaveBeenCalledWith({ status: 'finished', goals_for: 2, goals_against: 1 })
     expect(from().eq).toHaveBeenCalledWith('id', 'match-1')
+  })
+
+  it('updateMatch acepta el estado suspendido', async () => {
+    const from = mockFrom({ data: row })
+    await expect(updateMatch('match-1', { status: 'suspended', goals_for: null, goals_against: null })).resolves.toEqual(row)
+    expect(from().update).toHaveBeenCalledWith({ status: 'suspended', goals_for: null, goals_against: null })
   })
 
   it('deleteMatch elimina por id', async () => {

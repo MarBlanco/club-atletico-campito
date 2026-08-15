@@ -1,6 +1,6 @@
 import type { ID } from './common'
 
-export type MatchStatus = 'upcoming' | 'finished'
+export type MatchStatus = 'upcoming' | 'finished' | 'suspended'
 
 export interface Match {
   id: ID
