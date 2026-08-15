@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getClub } from '../services/clubService'
 import type { Club } from '../types/club'
+import ContactCard from '../components/content/ContactCard'
 
 // Mock genérico y aislado: el contrato actual de `club` solo define `location`.
 // Reemplazar cuando existan campos reales de contacto en el modelo.
@@ -47,32 +48,6 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: 20,
-  } as React.CSSProperties,
-
-  card: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    padding: 20,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 6,
-  } as React.CSSProperties,
-
-  cardLabel: {
-    fontSize: 11,
-    fontWeight: 700,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 1,
-    color: '#1EB9E8',
-    margin: 0,
-  } as React.CSSProperties,
-
-  cardValue: {
-    fontSize: 15,
-    fontWeight: 500,
-    color: '#111111',
-    margin: 0,
   } as React.CSSProperties,
 
   empty: {
@@ -136,20 +111,14 @@ function ContactPage() {
         </div>
       ) : (
         <div style={styles.grid}>
-          <article style={styles.card}>
-            <p style={styles.cardLabel}>Ubicación</p>
-            <p style={styles.cardValue}>{club.location}</p>
-          </article>
+          <ContactCard label="Ubicación" value={club.location} />
         </div>
       )}
 
       <h2 style={styles.sectionTitle}>Otros medios</h2>
       <div style={styles.grid}>
         {MOCK_CONTACT_ITEMS.map(item => (
-          <article key={item.label} style={styles.card}>
-            <p style={styles.cardLabel}>{item.label}</p>
-            <p style={styles.cardValue}>{item.value}</p>
-          </article>
+          <ContactCard key={item.label} label={item.label} value={item.value} />
         ))}
       </div>
     </div>

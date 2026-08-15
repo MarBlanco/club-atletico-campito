@@ -1,3 +1,5 @@
+import PlayerCard from '../components/content/PlayerCard'
+
 interface Player {
   name: string
   surname: string
@@ -71,29 +73,6 @@ const styles = {
     gap: 20,
   } as React.CSSProperties,
 
-  card: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    padding: 20,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 6,
-  } as React.CSSProperties,
-
-  playerName: {
-    fontSize: 16,
-    fontWeight: 600,
-    color: '#111111',
-    margin: 0,
-  } as React.CSSProperties,
-
-  playerMeta: {
-    fontSize: 13,
-    color: '#6b7280',
-    margin: 0,
-  } as React.CSSProperties,
-
   empty: {
     backgroundColor: '#ffffff',
     border: '1px solid #e5e7eb',
@@ -126,15 +105,13 @@ function FirstTeamPage() {
       ) : (
         <div style={styles.grid}>
           {MOCK_PLAYERS.map(player => (
-            <article key={`${player.surname}-${player.number}`} style={styles.card}>
-              <h3 style={styles.playerName}>
-                {player.name} {player.surname}
-              </h3>
-              <p style={styles.playerMeta}>{player.position}</p>
-              {player.number !== null && (
-                <p style={styles.playerMeta}>N° {player.number}</p>
-              )}
-            </article>
+            <PlayerCard
+              key={`${player.surname}-${player.number}`}
+              name={player.name}
+              surname={player.surname}
+              number={player.number}
+              position={player.position}
+            />
           ))}
         </div>
       )}
