@@ -17,6 +17,7 @@ export interface CreateNewsDTO {
   content: string
   image_url: string
   published: boolean
+  author_id?: ID | null
 }
 
 export interface UpdateNewsDTO {

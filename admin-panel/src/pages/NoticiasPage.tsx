@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import type { News, CreateNewsDTO, UpdateNewsDTO } from '../types/news'
 import { getNews, createNews, updateNews, deleteNews } from '../services/newsService'
 import { uploadImage } from '../services/storageService'
+import { useAuth } from '../context/AuthContext'
 
 const EMPTY_FORM: CreateNewsDTO = {
   title: '',
@@ -14,6 +15,7 @@ const EMPTY_FORM: CreateNewsDTO = {
 type FormData = CreateNewsDTO
 
 function NoticiasPage() {
+  const { user } = useAuth()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -87,7 +89,7 @@ function NoticiasPage() {
         const dto: UpdateNewsDTO = form
         await updateNews(editingId, dto)
       } else {
-        await createNews(form)
+        await createNews({ ...form, author_id: user?.id ?? null })
       }
       closeForm()
       reload()
