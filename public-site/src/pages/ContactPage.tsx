@@ -10,6 +10,8 @@ const MOCK_CONTACT_ITEMS = [
   { label: 'Redes sociales', value: 'Próximamente' },
 ]
 
+import SectionHeader from '../components/content/SectionHeader'
+
 const styles = {
   header: {
     marginBottom: 32,
@@ -32,15 +34,6 @@ const styles = {
   status: {
     color: '#6b7280',
     fontSize: 14,
-  } as React.CSSProperties,
-
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#111111',
-    margin: '0 0 16px',
-    borderLeft: '4px solid #123A9E',
-    paddingLeft: 12,
   } as React.CSSProperties,
 
   grid: {
@@ -125,7 +118,7 @@ function ContactPage() {
         </p>
       </div>
 
-      <h2 style={styles.sectionTitle}>Ubicación</h2>
+      <SectionHeader title="Ubicación" />
       {loading ? (
         <p style={styles.status} role="status" aria-live="polite">Cargando contacto...</p>
       ) : error ? (
@@ -143,7 +136,7 @@ function ContactPage() {
         </div>
       )}
 
-      <h2 style={styles.sectionTitle}>Otros medios</h2>
+      <SectionHeader title="Otros medios" />
       <div style={styles.grid}>
         {MOCK_CONTACT_ITEMS.map(item => (
           <article key={item.label} style={styles.card}>

@@ -13,6 +13,8 @@ const MOCK_PLAYERS: Player[] = [
   { name: 'Jugador', surname: 'Cuatro', number: 9, position: 'Delantero' },
 ]
 
+import SectionHeader from '../components/content/SectionHeader'
+
 const styles = {
   header: {
     marginBottom: 32,
@@ -54,15 +56,6 @@ const styles = {
     lineHeight: 1.6,
     color: '#374151',
     margin: 0,
-  } as React.CSSProperties,
-
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#111111',
-    margin: '0 0 16px',
-    borderLeft: '4px solid #123A9E',
-    paddingLeft: 12,
   } as React.CSSProperties,
 
   grid: {
@@ -120,7 +113,7 @@ function FirstTeamPage() {
         </p>
       </div>
 
-      <h2 style={styles.sectionTitle}>Plantel</h2>
+      <SectionHeader title="Plantel" />
       {MOCK_PLAYERS.length === 0 ? (
         <div style={styles.empty}>No hay jugadores cargados todavía.</div>
       ) : (
