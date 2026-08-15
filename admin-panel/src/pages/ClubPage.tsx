@@ -5,6 +5,7 @@ import ImageUploader from '../components/media/ImageUploader'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import LoadingState from '../components/ui/LoadingState'
+import FormActions from '../components/admin/FormActions'
 
 function ClubPage() {
   const [club, setClub] = useState<Club | null>(null)
@@ -130,11 +131,7 @@ function ClubPage() {
               label="Logo"
             />
           </Field>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
-              {saving ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
+<FormActions saving={saving} style={{ marginTop: 8 }} />
         </form>
       </div>
     </div>
@@ -148,19 +145,6 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; 
       {children}
     </div>
   )
-}
-
-function btnStyle(bg: string): React.CSSProperties {
-  return {
-    padding: '9px 18px',
-    background: bg,
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: 'pointer',
-  }
 }
 
 export default ClubPage

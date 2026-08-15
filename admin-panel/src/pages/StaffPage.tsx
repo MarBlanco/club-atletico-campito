@@ -5,10 +5,13 @@ import { getStaff, createStaff, updateStaff, deleteStaff } from '../services/sta
 import { uploadImage } from '../services/storageService'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
-import Badge from '../components/ui/Badge'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
+import DataTable, { type DataTableColumn } from '../components/admin/DataTable'
+import ActionMenu from '../components/admin/ActionMenu'
+import StatusBadge from '../components/admin/StatusBadge'
+import FormActions from '../components/admin/FormActions'
 
 const CATEGORIES: StaffCategory[] = ['primera', 'infanto', 'directivos']
 
@@ -17,6 +20,14 @@ const CATEGORY_LABELS: Record<StaffCategory, string> = {
   infanto: 'Infanto Juvenil',
   directivos: 'Directivos',
 }
+
+const COLUMNS: DataTableColumn[] = [
+  { key: 'name', label: 'Nombre' },
+  { key: 'role', label: 'Rol' },
+  { key: 'category', label: 'Categoría' },
+  { key: 'status', label: 'Estado' },
+  { key: 'actions', label: 'Acciones', width: 140 },
+]
 
 const EMPTY_FORM: CreateStaffDTO = {
   name: '',
@@ -187,11 +198,8 @@ const [imageFile, setImageFile] = useState<File | null>(null)
                 Activo
               </label>
             </div>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
-              <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
-                {saving ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button type="button" onClick={closeForm} style={btnStyle('#6b7280')}>Cancelar</button>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <FormActions saving={saving} onCancel={closeForm} style={{ gridColumn: '1 / -1', marginTop: 0 }} />
             </div>
           </form>
         </div>
@@ -202,41 +210,27 @@ const [imageFile, setImageFile] = useState<File | null>(null)
       ) : staff.length === 0 ? (
         <EmptyState message="No hay miembros del staff todavía." />
       ) : (
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                <th style={thStyle}>Nombre</th>
-                <th style={thStyle}>Rol</th>
-                <th style={thStyle}>Categoría</th>
-                <th style={thStyle}>Estado</th>
-                <th style={{ ...thStyle, width: 140 }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staff.map((s, i) => (
-                <tr key={s.id} style={{ borderBottom: i < staff.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{s.name}</td>
-                  <td style={tdStyle}>{s.role}</td>
-                  <td style={tdStyle}>{CATEGORY_LABELS[s.category]}</td>
-                  <td style={tdStyle}>
-                    <Badge variant={s.active ? 'green' : 'gray'}>
-                      {s.active ? 'Activo' : 'Inactivo'}
-                    </Badge>
-                  </td>
-                  <td style={tdStyle}>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={() => openEdit(s)} style={btnSmall('#3b82f6')}>Editar</button>
-                      <button onClick={() => handleDelete(s.id)} style={btnSmall('#ef4444')}>Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </div>
+<DataTable
+          columns={COLUMNS}
+          rows={staff}
+          keyField={s => s.id}
+          renderCell={(s, column) => {
+            switch (column.key) {
+              case 'name':
+                return <span style={{ fontWeight: 600 }}>{s.name}</span>
+              case 'role':
+                return s.role
+              case 'category':
+                return <StatusBadge label={CATEGORY_LABELS[s.category]} tone="gray" />
+              case 'status':
+                return <StatusBadge label={s.active ? 'Activo' : 'Inactivo'} tone={s.active ? 'green' : 'gray'} />
+              case 'actions':
+                return <ActionMenu onEdit={() => openEdit(s)} onDelete={() => handleDelete(s.id)} />
+              default:
+                return null
+            }
+          }}
+        />
       )}
 
       {confirmId && (
@@ -260,28 +254,8 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
   )
 }
 
-const thStyle: React.CSSProperties = {
-  padding: '11px 16px',
-  textAlign: 'left',
-  fontSize: 12,
-  fontWeight: 600,
-  color: '#6b7280',
-  textTransform: 'uppercase',
-  letterSpacing: 0.5,
-}
-
-const tdStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  color: '#374151',
-  verticalAlign: 'middle',
-}
-
 function btnStyle(bg: string): React.CSSProperties {
   return { padding: '9px 18px', background: bg, color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-}
-
-function btnSmall(bg: string): React.CSSProperties {
-  return { padding: '5px 12px', background: bg, color: '#fff', border: 'none', borderRadius: 5, fontSize: 12, fontWeight: 600, cursor: 'pointer' }
 }
 
 export default StaffPage
