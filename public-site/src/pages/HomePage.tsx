@@ -10,6 +10,9 @@ import { getClub } from '../services/clubService'
 import { getLatestMedia } from '../services/mediaService'
 import { getLatestGalleries } from '../services/galleriesService'
 import { useIsMobile } from '../hooks/useMediaQuery'
+import NewsCard from '../components/content/NewsCard'
+import MatchCard from '../components/content/MatchCard'
+import GalleryCard from '../components/content/GalleryCard'
 
 function HomePage() {
   const isMobile = useIsMobile()
@@ -217,114 +220,9 @@ function HomePage() {
       margin: 0,
     } as React.CSSProperties,
 
-    newsCard: {
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: 8,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      minHeight: 160,
-    } as React.CSSProperties,
-
-    newsImage: {
-      width: '100%',
-      height: 160,
-      objectFit: 'cover' as const,
-      backgroundColor: '#f3f4f6',
-    } as React.CSSProperties,
-
-    newsBody: {
-      padding: 16,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: 6,
-    } as React.CSSProperties,
-
-    newsDate: {
-      fontSize: 11,
-      fontWeight: 600,
-      textTransform: 'uppercase' as const,
-      letterSpacing: 0.5,
-      color: '#1EB9E8',
-      margin: 0,
-    } as React.CSSProperties,
-
-    newsTitle: {
-      fontSize: 16,
-      fontWeight: 600,
-      color: '#111111',
-      margin: 0,
-      lineHeight: 1.3,
-    } as React.CSSProperties,
-
-    newsExcerpt: {
-      fontSize: 13,
-      color: '#6b7280',
-      margin: 0,
-      lineHeight: 1.5,
-    } as React.CSSProperties,
-
     status: {
       color: '#6b7280',
       fontSize: 14,
-    } as React.CSSProperties,
-
-    matchCard: {
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderLeft: '4px solid #1EB9E8',
-      borderRadius: 8,
-      padding: 24,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: 10,
-    } as React.CSSProperties,
-
-    matchLabel: {
-      fontSize: 12,
-      fontWeight: 600,
-      textTransform: 'uppercase' as const,
-      letterSpacing: 1,
-      color: '#1EB9E8',
-      margin: 0,
-    } as React.CSSProperties,
-
-    matchRival: {
-      fontSize: 22,
-      fontWeight: 700,
-      color: '#123A9E',
-      margin: 0,
-      lineHeight: 1.2,
-    } as React.CSSProperties,
-
-    matchRow: {
-      display: 'flex',
-      flexWrap: 'wrap' as const,
-      gap: 16,
-      fontSize: 14,
-      color: '#111111',
-      margin: 0,
-    } as React.CSSProperties,
-
-    matchMetaItem: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: 2,
-    } as React.CSSProperties,
-
-    matchMetaLabel: {
-      fontSize: 11,
-      fontWeight: 600,
-      textTransform: 'uppercase' as const,
-      letterSpacing: 0.5,
-      color: '#6b7280',
-    } as React.CSSProperties,
-
-    matchMetaValue: {
-      fontSize: 14,
-      fontWeight: 500,
-      color: '#111111',
     } as React.CSSProperties,
 
     clubCard: {
@@ -413,78 +311,6 @@ function HomePage() {
       backgroundColor: 'rgba(18, 58, 158, 0.9)',
       color: '#ffffff',
     } as React.CSSProperties,
-
-    galleryCard: {
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: 8,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      minHeight: 200,
-    } as React.CSSProperties,
-
-    galleryCover: {
-      width: '100%',
-      height: 140,
-      objectFit: 'cover' as const,
-      backgroundColor: '#f3f4f6',
-    } as React.CSSProperties,
-
-    galleryBody: {
-      padding: 14,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: 4,
-    } as React.CSSProperties,
-
-    galleryCategory: {
-      fontSize: 11,
-      fontWeight: 700,
-      textTransform: 'uppercase' as const,
-      letterSpacing: 1,
-      color: '#1EB9E8',
-      margin: 0,
-    } as React.CSSProperties,
-
-    galleryTitle: {
-      fontSize: 15,
-      fontWeight: 600,
-      color: '#111111',
-      margin: 0,
-      lineHeight: 1.3,
-    } as React.CSSProperties,
-
-    galleryDate: {
-      fontSize: 12,
-      color: '#6b7280',
-      margin: 0,
-    } as React.CSSProperties,
-  }
-
-  const CATEGORY_LABELS: Record<string, string> = {
-    primera: 'Primera',
-    infanto: 'Infanto Juvenil',
-    femenino: 'Femenino',
-    veteranos: 'Veteranos',
-    familias: 'Familias',
-    hinchas: 'Hinchas',
-  }
-
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString('es-AR', {
-      weekday: 'long',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
-
-  function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
   }
 
   const staticSections = [
@@ -564,22 +390,7 @@ function HomePage() {
             </div>
           ) : (
             news.map(item => (
-              <article key={item.id} style={styles.newsCard}>
-                {item.image_url && (
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    loading="lazy"
-                    decoding="async"
-                    style={styles.newsImage}
-                  />
-                )}
-                <div style={styles.newsBody}>
-                  <p style={styles.newsDate}>{formatDate(item.created_at)}</p>
-                  <h3 style={styles.newsTitle}>{item.title}</h3>
-                  <p style={styles.newsExcerpt}>{item.excerpt}</p>
-                </div>
-              </article>
+              <NewsCard key={item.id} news={item} />
             ))
           )}
         </div>
@@ -598,24 +409,7 @@ function HomePage() {
               <p style={styles.placeholderText}>Próximo partido</p>
             </div>
           ) : (
-            <article style={styles.matchCard}>
-              <p style={styles.matchLabel}>Próximo partido</p>
-              <h3 style={styles.matchRival}>{`vs ${nextMatch.rival}`}</h3>
-              <div style={styles.matchRow}>
-                <div style={styles.matchMetaItem}>
-                  <span style={styles.matchMetaLabel}>Fecha</span>
-                  <span style={styles.matchMetaValue}>{formatDate(nextMatch.date)}</span>
-                </div>
-                <div style={styles.matchMetaItem}>
-                  <span style={styles.matchMetaLabel}>Hora</span>
-                  <span style={styles.matchMetaValue}>{formatTime(nextMatch.date)}</span>
-                </div>
-                <div style={styles.matchMetaItem}>
-                  <span style={styles.matchMetaLabel}>Torneo</span>
-                  <span style={styles.matchMetaValue}>{nextMatch.competition}</span>
-                </div>
-              </div>
-            </article>
+            <MatchCard match={nextMatch} />
           )}
         </div>
       </section>
@@ -663,28 +457,7 @@ function HomePage() {
             </div>
           ) : (
             galleries.map(g => (
-              <article key={g.id} style={styles.galleryCard}>
-                <img
-                  src={g.cover_image}
-                  alt={g.title}
-                  loading="lazy"
-                  decoding="async"
-                  style={styles.galleryCover}
-                />
-                <div style={styles.galleryBody}>
-                  <p style={styles.galleryCategory}>
-                    {CATEGORY_LABELS[g.category] ?? g.category}
-                  </p>
-                  <h3 style={styles.galleryTitle}>{g.title}</h3>
-                  <p style={styles.galleryDate}>
-                    {new Date(g.match_date).toLocaleDateString('es-AR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-              </article>
+              <GalleryCard key={g.id} gallery={g} />
             ))
           )}
         </div>
