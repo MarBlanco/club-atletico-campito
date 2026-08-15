@@ -22,30 +22,30 @@ function DashboardPage() {
   const isMobile = useIsMobile()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    Promise.all([getNews(), getPlayers(), getStaff(), getMatches(), getGalleries(), getMedia()])
-      .then(([news, players, staff, matches, galleries, media]) => {
-        setStats({
-          news: news.length,
-          players: players.length,
-          staff: staff.length,
-          matches: matches.length,
-          galleries: galleries.length,
-          media: media.length,
-        })
-        setError(null)
-      })
-      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar el dashboard'))
-      .finally(() => setLoading(false))
+    let active = true
+    async function load() {
+      const count = (p: Promise<unknown[]>) => p.then(a => a.length).catch(() => 0)
+      const [news, players, staff, matches, galleries, media] = await Promise.all([
+        count(getNews()),
+        count(getPlayers()),
+        count(getStaff()),
+        count(getMatches()),
+        count(getGalleries()),
+        count(getMedia()),
+      ])
+      if (!active) return
+      setStats({ news, players, staff, matches, galleries, media })
+      setLoading(false)
+    }
+    load()
+    return () => { active = false }
   }, [])
 
   return (
     <Container>
       <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a2e', margin: '0 0 24px' }}>Dashboard</h2>
-
-      {error && <p style={{ color: '#ef4444', marginBottom: 16, fontSize: 13 }} role="alert">{error}</p>}
 
       {loading ? (
         <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
