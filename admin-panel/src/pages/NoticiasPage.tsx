@@ -56,7 +56,6 @@ const [confirmId, setConfirmId] = useState<string | null>(null)
   function openCreate() {
     setEditingId(null)
     setForm(EMPTY_FORM)
-    setImageFile(null)
     setShowForm(true)
   }
 
@@ -69,7 +68,6 @@ const [confirmId, setConfirmId] = useState<string | null>(null)
       image_url: item.image_url,
       published: item.published,
     })
-    setImageFile(null)
     setShowForm(true)
   }
 
@@ -77,7 +75,6 @@ const [confirmId, setConfirmId] = useState<string | null>(null)
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
-    setImageFile(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
