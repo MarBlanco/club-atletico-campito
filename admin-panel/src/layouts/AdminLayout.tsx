@@ -146,6 +146,7 @@ const navItems = [
   { to: '/galerias', label: 'Galerías' },
   { to: '/multimedia', label: 'Multimedia' },
   { to: '/usuarios', label: 'Usuarios', adminOnly: true },
+  { to: '/configuracion', label: 'Configuración', adminOnly: true },
 ]
 
 function AdminLayout() {

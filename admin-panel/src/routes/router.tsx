@@ -15,6 +15,7 @@ const MultimediaPage = lazy(() => import('../pages/MultimediaPage'))
 const GalleriesPage = lazy(() => import('../pages/GalleriesPage'))
 const ClubPage = lazy(() => import('../pages/ClubPage'))
 const UsersPage = lazy(() => import('../pages/UsersPage'))
+const ConfiguracionPage = lazy(() => import('../pages/ConfiguracionPage'))
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,14 @@ const router = createBrowserRouter([
             element: (
               <RoleGuard>
                 <UsersPage />
+              </RoleGuard>
+            ),
+          },
+          {
+            path: '/configuracion',
+            element: (
+              <RoleGuard>
+                <ConfiguracionPage />
               </RoleGuard>
             ),
           },
