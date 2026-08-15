@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getMedia } from '../services/mediaService'
-import type { Media, MediaType } from '../types/media'
+import type { Media } from '../types/media'
+import GalleryGrid from '../components/media/GalleryGrid'
+import Lightbox from '../components/media/Lightbox'
 
 const styles = {
   header: {
@@ -26,44 +28,6 @@ const styles = {
     fontSize: 14,
   } as React.CSSProperties,
 
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    gap: 20,
-  } as React.CSSProperties,
-
-  card: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    overflow: 'hidden' as const,
-    position: 'relative' as const,
-    display: 'flex',
-    flexDirection: 'column' as const,
-  } as React.CSSProperties,
-
-  thumb: {
-    width: '100%',
-    aspectRatio: '16 / 9',
-    objectFit: 'cover' as const,
-    display: 'block',
-    backgroundColor: '#f3f4f6',
-  } as React.CSSProperties,
-
-  badge: {
-    position: 'absolute' as const,
-    top: 12,
-    left: 12,
-    fontSize: 11,
-    fontWeight: 700,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 1,
-    color: '#ffffff',
-    backgroundColor: '#123A9E',
-    padding: '4px 10px',
-    borderRadius: 4,
-  } as React.CSSProperties,
-
   empty: {
     backgroundColor: '#ffffff',
     border: '1px solid #e5e7eb',
@@ -75,15 +39,11 @@ const styles = {
   } as React.CSSProperties,
 }
 
-const TYPE_LABELS: Record<MediaType, string> = {
-  image: 'Imagen',
-  video: 'Video',
-}
-
 function MultimediaPage() {
   const [items, setItems] = useState<Media[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lightbox, setLightbox] = useState<Media | null>(null)
 
   useEffect(() => {
     let active = true
@@ -124,31 +84,10 @@ function MultimediaPage() {
       ) : items.length === 0 ? (
         <div style={styles.empty}>No hay contenido multimedia cargado todavía.</div>
       ) : (
-        <div style={styles.grid}>
-          {items.map(item => (
-            <article key={item.id} style={styles.card}>
-              {item.type === 'video' ? (
-                <video
-                  src={item.url}
-                  poster={item.thumbnail_url || undefined}
-                  controls
-                  preload="metadata"
-                  style={styles.thumb}
-                />
-              ) : (
-                <img
-                  src={item.thumbnail_url || item.url}
-                  alt={`${TYPE_LABELS[item.type]} multimedia`}
-                  loading="lazy"
-                  decoding="async"
-                  style={styles.thumb}
-                />
-              )}
-              <span style={styles.badge}>{TYPE_LABELS[item.type]}</span>
-            </article>
-          ))}
-        </div>
+        <GalleryGrid items={items} onSelect={setLightbox} />
       )}
+
+      {lightbox && <Lightbox item={lightbox} onClose={() => setLightbox(null)} />}
     </div>
   )
 }

@@ -1,7 +1,7 @@
-﻿import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import type { Club, UpdateClubDTO } from '../types/club'
 import { getClub, updateClub } from '../services/clubService'
-import { uploadImage } from '../services/storageService'
+import ImageUploader from '../components/media/ImageUploader'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import LoadingState from '../components/ui/LoadingState'
@@ -20,9 +20,6 @@ function ClubPage() {
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getClub()
@@ -40,21 +37,6 @@ function ClubPage() {
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar club'))
       .finally(() => setLoading(false))
   }, [])
-
-  async function handleUploadImage() {
-    if (!imageFile) return
-    setUploading(true)
-    try {
-      const { publicUrl } = await uploadImage(imageFile, 'club')
-      setForm(p => ({ ...p, logo_url: publicUrl }))
-      setImageFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error al subir imagen')
-    } finally {
-      setUploading(false)
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -140,39 +122,16 @@ function ClubPage() {
             />
           </Field>
           <Field label="Logo" htmlFor="club-logo">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input
-                  ref={fileInputRef}
-                  id="club-logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setImageFile(e.target.files?.[0] ?? null)}
-                  style={{ fontSize: 13, flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={handleUploadImage}
-                  disabled={!imageFile || uploading}
-                  style={btnStyle(imageFile && !uploading ? '#059669' : '#9ca3af')}
-                >
-                  {uploading ? 'Subiendo...' : 'Subir'}
-                </button>
-              </div>
-              {typeof form.logo_url === 'string' && form.logo_url.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <img
-                    src={form.logo_url}
-                    alt="Preview"
-                    style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
-                  />
-                  <span style={{ fontSize: 11, color: '#6b7280', wordBreak: 'break-all' }}>{form.logo_url}</span>
-                </div>
-              )}
-            </div>
+            <ImageUploader
+              id="club-logo"
+              folder="club"
+              value={typeof form.logo_url === 'string' ? form.logo_url : ''}
+              onChange={url => setForm(p => ({ ...p, logo_url: url }))}
+              label="Logo"
+            />
           </Field>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button type="submit" disabled={saving || uploading} style={btnStyle('#1a1a2e')}>
+            <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
               {saving ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

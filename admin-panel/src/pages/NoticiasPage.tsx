@@ -1,7 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import type { News, CreateNewsDTO, UpdateNewsDTO } from '../types/news'
 import { getNews, createNews, updateNews, deleteNews } from '../services/newsService'
-import { uploadImage } from '../services/storageService'
 import { useAuth } from '../context/AuthContext'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
@@ -9,6 +8,7 @@ import Badge from '../components/ui/Badge'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
+import ImageUploader from '../components/media/ImageUploader'
 
 const EMPTY_FORM: CreateNewsDTO = {
   title: '',
@@ -31,10 +31,7 @@ function NoticiasPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [confirmId, setConfirmId] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -71,21 +68,6 @@ function NoticiasPage() {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setImageFile(null)
-  }
-
-  async function handleUploadImage() {
-    if (!imageFile) return
-    setUploading(true)
-    try {
-      const { publicUrl } = await uploadImage(imageFile, 'news')
-      setForm(p => ({ ...p, image_url: publicUrl }))
-      setImageFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error al subir imagen')
-    } finally {
-      setUploading(false)
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -163,36 +145,14 @@ function NoticiasPage() {
               />
             </Field>
             <Field label="Imagen" htmlFor="news-image">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input
-                    ref={fileInputRef}
-                    id="news-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={e => setImageFile(e.target.files?.[0] ?? null)}
-                    style={{ fontSize: 13, flex: 1 }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleUploadImage}
-                    disabled={!imageFile || uploading}
-                    style={btnStyle(imageFile && !uploading ? '#059669' : '#9ca3af')}
-                  >
-                    {uploading ? 'Subiendo...' : 'Subir'}
-                  </button>
-                </div>
-                {form.image_url && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <img
-                      src={form.image_url}
-                      alt="Preview"
-                      style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
-                    />
-                    <span style={{ fontSize: 11, color: '#6b7280', wordBreak: 'break-all' }}>{form.image_url}</span>
-                  </div>
-                )}
-              </div>
+              <ImageUploader
+                id="news-image"
+                folder="news"
+                value={form.image_url}
+                onChange={url => setForm(p => ({ ...p, image_url: url }))}
+                aspectRatio={4 / 3}
+                label="Imagen"
+              />
             </Field>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
               <input
