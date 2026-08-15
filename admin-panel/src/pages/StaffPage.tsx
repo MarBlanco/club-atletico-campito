@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Staff, CreateStaffDTO, UpdateStaffDTO, StaffCategory } from '../types/staff'
 import { getStaff, createStaff, updateStaff, deleteStaff } from '../services/staffService'
+import { uploadImage } from '../services/storageService'
 
 const CATEGORIES: StaffCategory[] = ['primera', 'infanto', 'directivos']
 
@@ -30,6 +31,9 @@ function StaffPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateStaffDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getStaff()
@@ -93,6 +97,21 @@ function StaffPage() {
     }
   }
 
+  async function handleUploadImage() {
+    if (!imageFile) return
+    setUploading(true)
+    try {
+      const { publicUrl } = await uploadImage(imageFile, 'staff')
+      setForm(p => ({ ...p, image_url: publicUrl }))
+      setImageFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -126,6 +145,30 @@ function StaffPage() {
                 onChange={e => setForm(p => ({ ...p, image_url: e.target.value || null }))}
                 style={inputStyle}
               />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setImageFile(e.target.files?.[0] ?? null)}
+                  style={{ fontSize: 13, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleUploadImage}
+                  disabled={!imageFile || uploading}
+                  style={btnStyle(imageFile && !uploading ? '#059669' : '#9ca3af')}
+                >
+                  {uploading ? 'Subiendo...' : 'Subir'}
+                </button>
+              </div>
+              {form.image_url && (
+                <img
+                  src={form.image_url}
+                  alt="Preview"
+                  style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
+                />
+              )}
             </Field>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>

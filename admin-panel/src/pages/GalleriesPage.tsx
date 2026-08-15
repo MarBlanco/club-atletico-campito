@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Gallery, CreateGalleryDTO, UpdateGalleryDTO, GalleryCategory } from '../types/galleries'
 import { getGalleries, createGallery, updateGallery, deleteGallery } from '../services/galleriesService'
+import { uploadImage } from '../services/storageService'
 
 const CATEGORIES: GalleryCategory[] = ['primera', 'infanto', 'femenino', 'veteranos', 'familias', 'hinchas']
 
@@ -32,6 +33,9 @@ function GalleriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateGalleryDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getGalleries()
@@ -94,6 +98,21 @@ function GalleriesPage() {
     }
   }
 
+  async function handleUploadImage() {
+    if (!imageFile) return
+    setUploading(true)
+    try {
+      const { publicUrl } = await uploadImage(imageFile, 'galleries')
+      setForm(p => ({ ...p, cover_image: publicUrl }))
+      setImageFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -122,16 +141,31 @@ function GalleriesPage() {
             </Field>
             <Field label="URL imagen de portada" htmlFor="gallery-cover" style={{ gridColumn: '1 / -1' }}>
               <input id="gallery-cover" value={form.cover_image} onChange={e => setForm(p => ({ ...p, cover_image: e.target.value }))} required style={inputStyle} />
-            </Field>
-            {form.cover_image && (
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setImageFile(e.target.files?.[0] ?? null)}
+                  style={{ fontSize: 13, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleUploadImage}
+                  disabled={!imageFile || uploading}
+                  style={btnStyle(imageFile && !uploading ? '#059669' : '#9ca3af')}
+                >
+                  {uploading ? 'Subiendo...' : 'Subir'}
+                </button>
+              </div>
+              {form.cover_image && (
                 <img
                   src={form.cover_image}
                   alt="Preview portada"
                   style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
                 />
-              </div>
-            )}
+              )}
+            </Field>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
               <button type="submit" disabled={saving} style={btnStyle('#1a1a2e')}>
                 {saving ? 'Guardando...' : 'Guardar'}
