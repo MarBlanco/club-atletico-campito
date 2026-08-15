@@ -3,6 +3,12 @@ import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Staff, CreateStaffDTO, UpdateStaffDTO, StaffCategory } from '../types/staff'
 import { getStaff, createStaff, updateStaff, deleteStaff } from '../services/staffService'
 import { uploadImage } from '../services/storageService'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const CATEGORIES: StaffCategory[] = ['primera', 'infanto', 'directivos']
 
@@ -31,9 +37,10 @@ function StaffPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateStaffDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
+const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     getStaff()
@@ -87,11 +94,16 @@ function StaffPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar este miembro del staff?')) return
+  function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deleteStaff(id)
-      setStaff(prev => prev.filter(s => s.id !== id))
+      await deleteStaff(confirmId)
+      setStaff(prev => prev.filter(s => s.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -128,22 +140,21 @@ function StaffPage() {
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Nombre" htmlFor="staff-name">
-              <input id="staff-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={inputStyle} />
+              <Input id="staff-name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
             </Field>
             <Field label="Rol" htmlFor="staff-role">
-              <input id="staff-role" value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} required style={inputStyle} />
+              <Input id="staff-role" value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} required />
             </Field>
             <Field label="Categoría" htmlFor="staff-category">
-              <select id="staff-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as StaffCategory }))} style={inputStyle}>
+              <Select id="staff-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as StaffCategory }))}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
-              </select>
+              </Select>
             </Field>
             <Field label="URL de imagen (opcional)" htmlFor="staff-image">
-              <input
+              <Input
                 id="staff-image"
                 value={form.image_url ?? ''}
                 onChange={e => setForm(p => ({ ...p, image_url: e.target.value || null }))}
-                style={inputStyle}
               />
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input
@@ -187,9 +198,9 @@ function StaffPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : staff.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay miembros del staff todavía.</p>
+        <EmptyState message="No hay miembros del staff todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -210,17 +221,9 @@ function StaffPage() {
                   <td style={tdStyle}>{s.role}</td>
                   <td style={tdStyle}>{CATEGORY_LABELS[s.category]}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: s.active ? '#dcfce7' : '#f3f4f6',
-                      color: s.active ? '#16a34a' : '#6b7280',
-                    }}>
+                    <Badge variant={s.active ? 'green' : 'gray'}>
                       {s.active ? 'Activo' : 'Inactivo'}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -235,6 +238,15 @@ function StaffPage() {
           </div>
         </div>
       )}
+
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar miembro"
+          message="¿Eliminar este miembro del staff?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
+        />
+      )}
     </div>
   )
 }
@@ -246,16 +258,6 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {

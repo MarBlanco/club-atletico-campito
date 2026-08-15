@@ -3,6 +3,12 @@ import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Gallery, CreateGalleryDTO, UpdateGalleryDTO, GalleryCategory } from '../types/galleries'
 import { getGalleries, createGallery, updateGallery, deleteGallery } from '../services/galleriesService'
 import { uploadImage } from '../services/storageService'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const CATEGORIES: GalleryCategory[] = ['primera', 'infanto', 'femenino', 'veteranos', 'familias', 'hinchas']
 
@@ -33,9 +39,10 @@ function GalleriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateGalleryDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
+const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     getGalleries()
@@ -88,11 +95,16 @@ function GalleriesPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar este momento?')) return
+function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deleteGallery(id)
-      setGalleries(prev => prev.filter(g => g.id !== id))
+      await deleteGallery(confirmId)
+      setGalleries(prev => prev.filter(g => g.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -129,18 +141,18 @@ function GalleriesPage() {
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Título" htmlFor="gallery-title" style={{ gridColumn: '1 / -1' }}>
-              <input id="gallery-title" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required style={inputStyle} />
+              <Input id="gallery-title" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required />
             </Field>
             <Field label="Categoría" htmlFor="gallery-category">
-              <select id="gallery-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as GalleryCategory }))} style={inputStyle}>
+              <Select id="gallery-category" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as GalleryCategory }))}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
-              </select>
+              </Select>
             </Field>
             <Field label="Fecha del partido" htmlFor="gallery-date">
-              <input id="gallery-date" type="date" value={form.match_date} onChange={e => setForm(p => ({ ...p, match_date: e.target.value }))} required style={inputStyle} />
+              <Input id="gallery-date" type="date" value={form.match_date} onChange={e => setForm(p => ({ ...p, match_date: e.target.value }))} required />
             </Field>
             <Field label="URL imagen de portada" htmlFor="gallery-cover" style={{ gridColumn: '1 / -1' }}>
-              <input id="gallery-cover" value={form.cover_image} onChange={e => setForm(p => ({ ...p, cover_image: e.target.value }))} required style={inputStyle} />
+<Input id="gallery-cover" value={form.cover_image} onChange={e => setForm(p => ({ ...p, cover_image: e.target.value }))} required />
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input
                   ref={fileInputRef}
@@ -177,9 +189,9 @@ function GalleriesPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : galleries.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay momentos todavía.</p>
+<EmptyState message="No hay momentos todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -198,17 +210,9 @@ function GalleriesPage() {
                 <tr key={g.id} style={{ borderBottom: i < galleries.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{g.title}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: '#f3f4f6',
-                      color: '#374151',
-                    }}>
+                    <Badge variant="gray">
                       {CATEGORY_LABELS[g.category]}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={tdStyle}>{new Date(g.match_date).toLocaleDateString('es-AR')}</td>
                   <td style={tdStyle}>
@@ -230,6 +234,15 @@ function GalleriesPage() {
           </div>
         </div>
       )}
+
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar galería"
+          message="¿Eliminar esta galería?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
+        />
+      )}
     </div>
   )
 }
@@ -241,16 +254,6 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {

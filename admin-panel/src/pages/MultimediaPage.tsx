@@ -8,6 +8,12 @@ import { uploadImage, uploadVideo } from '../services/storageService'
 import { optimizeImageFromFile } from '../lib/optimizeImage'
 import { generateThumbnailFromFile } from '../lib/thumbnail'
 import CropModal from '../components/media/CropModal'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Badge from '../components/ui/Badge'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 const TYPE_LABELS: Record<MediaType, string> = {
   image: 'Imagen',
@@ -35,9 +41,10 @@ function MultimediaPage() {
   const [galleries, setGalleries] = useState<Gallery[]>([])
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [cropBlob, setCropBlob] = useState<Blob | null>(null)
+const [cropBlob, setCropBlob] = useState<Blob | null>(null)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [previewSrc, setPreviewSrc] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -157,11 +164,16 @@ function MultimediaPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Eliminar este archivo multimedia?')) return
+  function handleDelete(id: string) {
+    setConfirmId(id)
+  }
+
+  async function performDelete() {
+    if (!confirmId) return
     try {
-      await deleteMedia(id)
-      setMedia(prev => prev.filter(m => m.id !== id))
+      await deleteMedia(confirmId)
+      setMedia(prev => prev.filter(m => m.id !== confirmId))
+      setConfirmId(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al eliminar')
     }
@@ -187,13 +199,13 @@ function MultimediaPage() {
           </h3>
 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <Field label="Tipo" htmlFor="media-type">
-              <select id="media-type" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))} style={inputStyle}>
+              <Select id="media-type" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as MediaType }))}>
                 <option value="image">Imagen</option>
                 <option value="video">Video</option>
-              </select>
+              </Select>
             </Field>
-            <Field label="Galería" htmlFor="media-gallery">
-              <select id="media-gallery" value={form.gallery_id} onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))} required style={inputStyle}>
+<Field label="Galería" htmlFor="media-gallery">
+              <select id="media-gallery" value={form.gallery_id} onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))} required>
                 <option value="" disabled>Seleccionar galería</option>
                 {galleries.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
               </select>
@@ -255,20 +267,18 @@ accept={form.type === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp'}
               </div>
             </Field>
             <Field label="URL del archivo" htmlFor="media-url" style={{ gridColumn: '1 / -1' }}>
-              <input
+              <Input
                 id="media-url"
                 value={form.url}
                 onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
                 required
-                style={inputStyle}
               />
             </Field>
             <Field label="URL de thumbnail (opcional)" htmlFor="media-thumbnail" style={{ gridColumn: '1 / -1' }}>
-              <input
+              <Input
                 id="media-thumbnail"
                 value={form.thumbnail_url ?? ''}
                 onChange={e => setForm(p => ({ ...p, thumbnail_url: e.target.value || null }))}
-                style={inputStyle}
               />
             </Field>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10 }}>
@@ -282,9 +292,9 @@ accept={form.type === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp'}
       )}
 
       {loading ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }} role="status" aria-live="polite">Cargando...</p>
+        <LoadingState />
       ) : media.length === 0 ? (
-        <p style={{ color: '#6b7280', fontSize: 14 }}>No hay archivos multimedia todavía.</p>
+        <EmptyState message="No hay archivos multimedia todavía." />
       ) : (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
@@ -302,17 +312,9 @@ accept={form.type === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp'}
               {media.map((m, i) => (
                 <tr key={m.id} style={{ borderBottom: i < media.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
                   <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '2px 10px',
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: m.type === 'image' ? '#dbeafe' : '#fef3c7',
-                      color: m.type === 'image' ? '#1d4ed8' : '#92400e',
-                    }}>
+                    <Badge variant={m.type === 'image' ? 'blue' : 'amber'}>
                       {TYPE_LABELS[m.type]}
-                    </span>
+                    </Badge>
                   </td>
                   <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.url)}</td>
                   <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{m.thumbnail_url ? truncate(m.thumbnail_url) : '—'}</td>
@@ -331,11 +333,19 @@ accept={form.type === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp'}
         </div>
       )}
 
-      {cropSrc && (
+{cropSrc && (
         <CropModal
           src={cropSrc}
           onCancel={closeCrop}
           onSave={handleCropSave}
+        />
+      )}
+      {confirmId && (
+        <ConfirmDialog
+          title="Eliminar archivo"
+          message="¿Eliminar este archivo multimedia?"
+          onCancel={() => setConfirmId(null)}
+          onConfirm={performDelete}
         />
       )}
     </div>
@@ -349,16 +359,6 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
       {children}
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: 6,
-  fontSize: 14,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
 }
 
 const thStyle: React.CSSProperties = {
