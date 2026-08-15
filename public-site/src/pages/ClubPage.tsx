@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Club } from '../types/club'
 import { getClub } from '../services/clubService'
+import ClubLogo from '../components/content/ClubLogo'
 
 const styles = {
   header: {
@@ -139,15 +140,7 @@ function ClubPage() {
       ) : (
         <article style={styles.card}>
           <div style={styles.head}>
-            {club.logo_url && (
-              <img
-                src={club.logo_url}
-                alt="Escudo Club Atlético Campito"
-                loading="lazy"
-                decoding="async"
-                style={styles.logo}
-              />
-            )}
+            <ClubLogo src={club.logo_url} style={styles.logo} />
             <p style={styles.location}>{club.location}</p>
           </div>
           <div style={styles.block}>
