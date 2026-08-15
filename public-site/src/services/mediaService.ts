@@ -11,7 +11,7 @@ export async function getLatestMedia(limit = 4): Promise<Media[]> {
     .limit(limit)
 
   if (error) throw error
-  return data
+  return data ?? []
 }
 
 export async function getMedia(): Promise<Media[]> {

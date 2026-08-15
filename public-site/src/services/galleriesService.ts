@@ -11,7 +11,7 @@ export async function getLatestGalleries(limit = 4): Promise<Gallery[]> {
     .limit(limit)
 
   if (error) throw error
-  return data
+  return data ?? []
 }
 
 export async function getGalleries(): Promise<Gallery[]> {
