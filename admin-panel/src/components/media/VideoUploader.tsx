@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { StorageFolder } from '../../services/storageService'
-import { uploadVideo } from '../../services/storageService'
+import { uploadVideo, uploadImage } from '../../services/storageService'
+import { generateVideoThumbnail } from '../../lib/videoThumbnail'
 import MediaPreview from './MediaPreview'
 
 interface VideoUploaderProps {
@@ -8,9 +9,10 @@ interface VideoUploaderProps {
   folder: StorageFolder
   value: string
   onChange: (url: string) => void
+  onThumbnailChange?: (url: string | null) => void
 }
 
-function VideoUploader({ id = 'video-uploader-file', folder, value, onChange }: VideoUploaderProps) {
+function VideoUploader({ id = 'video-uploader-file', folder, value, onChange, onThumbnailChange }: VideoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,6 +25,12 @@ function VideoUploader({ id = 'video-uploader-file', folder, value, onChange }: 
     try {
       const { publicUrl } = await uploadVideo(file, folder)
       onChange(publicUrl)
+      if (onThumbnailChange) {
+        const blob = await generateVideoThumbnail(file)
+        const thumbFile = new File([blob], 'thumb.jpg', { type: 'image/jpeg' })
+        const thumb = await uploadImage(thumbFile, folder)
+        onThumbnailChange(thumb.publicUrl)
+      }
       if (inputRef.current) inputRef.current.value = ''
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al subir video')
