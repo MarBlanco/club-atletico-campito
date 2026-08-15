@@ -3,6 +3,7 @@ import type { News } from '../types/news'
 import type { Match } from '../types/matches'
 import type { Club } from '../types/club'
 import type { Media } from '../types/media'
+import ClubLogo from '../components/content/ClubLogo'
 import type { Gallery } from '../types/galleries'
 import { getLatestNews } from '../services/newsService'
 import { getNextMatch } from '../services/matchesService'
@@ -279,15 +280,7 @@ clubBlockText: {
           ) : (
             <article style={styles.clubCard}>
               <div style={styles.clubHead}>
-                {club.logo_url && (
-                  <img
-                    src={club.logo_url}
-                    alt="Escudo Club Atlético Campito"
-                    loading="lazy"
-                    decoding="async"
-                    style={styles.clubLogo}
-                  />
-                )}
+                <ClubLogo src={club.logo_url} style={styles.clubLogo} />
                 <p style={styles.clubLocation}>{club.location}</p>
               </div>
               <div style={styles.clubBlock}>
