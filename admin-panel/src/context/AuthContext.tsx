@@ -31,8 +31,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
     async function loadRole(userId: string) {
       try {
         const profile = await getUserById(userId)
-        if (active && profile) setRole(profile.role)
-        else if (active) setRole(null)
+        if (active && profile) {
+          setRole(profile.role)
+          return
+        }
+        // Self-heal: si el trigger handle_new_user no corrió, crear la fila.
+        const { data: authData } = await supabase.auth.getUser()
+        const u = authData?.user
+        if (active && u) {
+          await supabase.rpc('ensure_user_profile', {
+            p_id: u.id,
+            p_email: u.email ?? '',
+            p_name: u.user_metadata?.name ?? '',
+          })
+          const fresh = await getUserById(userId)
+          if (active && fresh) setRole(fresh.role)
+          else if (active) setRole(null)
+        } else if (active) {
+          setRole(null)
+        }
       } catch {
         if (active) setRole(null)
       }

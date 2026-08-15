@@ -54,7 +54,7 @@ BEGIN
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'role', 'colaborador')
+    'colaborador'
   );
   RETURN NEW;
 END;
@@ -74,3 +74,32 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
+-- ------------------------------------------------------------
+-- FUNCIÓN: ensure_user_profile (self-heal)
+-- Crea la fila en public.users si el trigger no corrió
+-- (usuario existente en auth.users sin perfil). Ejecutada por RPC
+-- desde el panel de administración. Sólo para el propio usuario.
+-- SECURITY DEFINER para insertar en public.users aún con RLS activo.
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.ensure_user_profile(p_id uuid, p_email text, p_name text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF p_id IS NULL OR p_id <> auth.uid() THEN
+    RETURN;
+  END IF;
+
+  INSERT INTO public.users (id, name, email, role)
+  VALUES (
+    p_id,
+    COALESCE(NULLIF(p_name, ''), split_part(p_email, '@', 1)),
+    p_email,
+    'colaborador'
+  )
+  ON CONFLICT (id) DO NOTHING;
+END;
+$$;
