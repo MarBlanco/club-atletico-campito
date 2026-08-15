@@ -9,15 +9,15 @@ import { getNextMatch } from '../services/matchesService'
 import { getClub } from '../services/clubService'
 import { getLatestMedia } from '../services/mediaService'
 import { getLatestGalleries } from '../services/galleriesService'
-import { useIsMobile } from '../hooks/useMediaQuery'
 import NewsCard from '../components/content/NewsCard'
 import MatchCard from '../components/content/MatchCard'
 import GalleryCard from '../components/content/GalleryCard'
 import GalleryGrid from '../components/media/GalleryGrid'
 import Lightbox from '../components/media/Lightbox'
+import HeroSection from '../components/content/HeroSection'
+import SectionHeader from '../components/content/SectionHeader'
 
 function HomePage() {
-  const isMobile = useIsMobile()
   const [news, setNews] = useState<News[]>([])
   const [newsLoading, setNewsLoading] = useState(true)
   const [newsError, setNewsError] = useState<string | null>(null)
@@ -156,41 +156,8 @@ function HomePage() {
   }, [])
 
   const styles = {
-    hero: {
-      backgroundColor: '#123A9E',
-      color: '#ffffff',
-      padding: isMobile ? '48px 16px' : '80px 24px',
-      borderRadius: 8,
-      textAlign: 'center' as const,
-      marginBottom: 48,
-    } as React.CSSProperties,
-
-    heroTitle: {
-      fontSize: isMobile ? 28 : 40,
-      fontWeight: 800,
-      letterSpacing: 0.5,
-      margin: 0,
-      lineHeight: 1.1,
-    } as React.CSSProperties,
-
-    heroSubtitle: {
-      fontSize: isMobile ? 15 : 18,
-      fontWeight: 400,
-      margin: '16px 0 0',
-      color: '#1EB9E8',
-    } as React.CSSProperties,
-
     section: {
       marginBottom: 48,
-    } as React.CSSProperties,
-
-    sectionTitle: {
-      fontSize: 24,
-      fontWeight: 700,
-      color: '#111111',
-      margin: '0 0 20px',
-      borderLeft: '4px solid #123A9E',
-      paddingLeft: 12,
     } as React.CSSProperties,
 
     grid: {
@@ -294,17 +261,11 @@ clubBlockText: {
   ]
 
   return (
-    <>
-      <div>
-      <section style={styles.hero}>
-        <h1 style={styles.heroTitle}>CLUB ATLÉTICO CAMPITO</h1>
-        <p style={styles.heroSubtitle}>
-          Colón, Entre Ríos · Argentina
-        </p>
-      </section>
+<div>
+      <HeroSection title="CLUB ATLÉTICO CAMPITO" subtitle="Colón, Entre Ríos · Argentina" />
 
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Club</h2>
+        <SectionHeader title="Club" />
         <div style={styles.grid}>
           {clubLoading ? (
             <p style={styles.status} role="status" aria-live="polite">Cargando club...</p>
@@ -351,7 +312,7 @@ clubBlockText: {
       </section>
 
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Noticias</h2>
+        <SectionHeader title="Noticias" />
         <div style={styles.grid}>
           {newsLoading ? (
             <p style={styles.status} role="status" aria-live="polite">Cargando noticias...</p>
@@ -371,7 +332,7 @@ clubBlockText: {
       </section>
 
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Próximo Partido</h2>
+        <SectionHeader title="Próximo Partido" />
         <div style={styles.grid}>
           {matchLoading ? (
             <p style={styles.status} role="status" aria-live="polite">Cargando fixture...</p>
@@ -389,7 +350,7 @@ clubBlockText: {
       </section>
 
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Multimedia</h2>
+        <SectionHeader title="Multimedia" />
         <div style={styles.grid}>
           {mediaLoading ? (
             <p style={styles.status} role="status" aria-live="polite">Cargando multimedia...</p>
@@ -407,7 +368,7 @@ clubBlockText: {
       </section>
 
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Momentos Campito</h2>
+        <SectionHeader title="Momentos Campito" />
         <div style={styles.grid}>
           {galleriesLoading ? (
             <p style={styles.status} role="status" aria-live="polite">Cargando momentos campito...</p>
@@ -428,7 +389,7 @@ clubBlockText: {
 
       {staticSections.map(({ title, items }) => (
         <section key={title} style={styles.section}>
-          <h2 style={styles.sectionTitle}>{title}</h2>
+          <SectionHeader title={title} />
           <div style={styles.grid}>
             {items.map(item => (
               <div key={item} style={styles.placeholderCard}>
@@ -439,10 +400,8 @@ clubBlockText: {
           </div>
         </section>
       ))}
-    </div>
-
     {lightbox && <Lightbox item={lightbox} onClose={() => setLightbox(null)} />}
-    </>
+    </div>
   )
 }
 
