@@ -15,7 +15,7 @@ import {
 import type { AppUser } from '../types/user'
 
 vi.mock('../lib/supabase', () => ({
-  supabase: { from: vi.fn(), rpc: vi.fn() },
+  supabase: { from: vi.fn(), functions: { invoke: vi.fn() } },
 }))
 
 function mockFrom(result: { data?: unknown; error?: unknown }) {
@@ -24,10 +24,10 @@ function mockFrom(result: { data?: unknown; error?: unknown }) {
   return from
 }
 
-function mockRpc(result: { data?: unknown; error?: unknown }) {
-  const rpc = supabase.rpc as unknown as Mock
-  rpc.mockResolvedValue(result)
-  return rpc
+function mockInvoke(result: { data?: unknown; error?: unknown }) {
+  const invoke = (supabase.functions as unknown as { invoke: Mock }).invoke
+  invoke.mockResolvedValue({ data: result.data ?? null, error: result.error ?? null })
+  return invoke
 }
 
 const row: AppUser = {
@@ -69,60 +69,61 @@ describe('usersService', () => {
     await expect(getUserById('missing')).resolves.toBeNull()
   })
 
-  it('getAdminUsers llama al RPC admin_list_users y devuelve el estado de baneo', async () => {
-    const data = [{ ...row, banned: true }]
-    const rpc = mockRpc({ data })
+  it('getAdminUsers invoca la Edge Function admin-users con action list', async () => {
+    const data = [{ ...row, banned: false }]
+    const invoke = mockInvoke({ data })
     await expect(getAdminUsers()).resolves.toEqual(data)
-    expect(rpc).toHaveBeenCalledWith('admin_list_users')
+    expect(invoke).toHaveBeenCalledWith('admin-users', { body: { action: 'list' } })
   })
 
-  it('getAdminUsers lanza el error cuando el RPC falla', async () => {
-    const error = { message: 'no autorizado' }
-    mockRpc({ error })
-    await expect(getAdminUsers()).rejects.toEqual(error)
+  it('getAdminUsers lanza el error devuelto por la Edge Function', async () => {
+    const invoke = mockInvoke({ data: null, error: { message: '{"error":"no autorizado"}' } })
+    await expect(getAdminUsers()).rejects.toThrow('no autorizado')
+    expect(invoke).toHaveBeenCalledWith('admin-users', { body: { action: 'list' } })
   })
 
-  it('adminCreateUser llama al RPC con nombre, email y contraseña', async () => {
-    const rpc = mockRpc({ data: 'user-2', error: null })
+  it('getAdminUsers lanza el error cuando el body tiene error', async () => {
+    mockInvoke({ data: { error: 'boom' } })
+    await expect(getAdminUsers()).rejects.toThrow('boom')
+  })
+
+  it('adminCreateUser invoca la Edge Function con action create', async () => {
+    const invoke = mockInvoke({ data: { ok: true } })
     await expect(adminCreateUser({ name: 'Leo', email: 'leo@campito.com', password: 'secreta123' })).resolves.toBeUndefined()
-    expect(rpc).toHaveBeenCalledWith('admin_create_user', {
-      p_name: 'Leo',
-      p_email: 'leo@campito.com',
-      p_password: 'secreta123',
+    expect(invoke).toHaveBeenCalledWith('admin-users', {
+      body: { action: 'create', name: 'Leo', email: 'leo@campito.com', password: 'secreta123' },
     })
   })
 
-  it('adminCreateUser lanza el error del RPC', async () => {
-    const error = { message: 'email inválido' }
-    mockRpc({ data: null, error })
-    await expect(adminCreateUser({ name: 'Leo', email: 'bad', password: 'secreta123' })).rejects.toEqual(error)
-  })
-
-  it('adminUpdateUser llama al RPC con id, nombre y email', async () => {
-    const rpc = mockRpc({ data: null, error: null })
+  it('adminUpdateUser invoca la Edge Function con action update', async () => {
+    const invoke = mockInvoke({ data: { ok: true } })
     await expect(adminUpdateUser('user-2', { name: 'Leo M', email: 'leo@campito.com' })).resolves.toBeUndefined()
-    expect(rpc).toHaveBeenCalledWith('admin_update_user', {
-      p_id: 'user-2',
-      p_name: 'Leo M',
-      p_email: 'leo@campito.com',
+    expect(invoke).toHaveBeenCalledWith('admin-users', {
+      body: { action: 'update', id: 'user-2', name: 'Leo M', email: 'leo@campito.com' },
     })
   })
 
-  it('adminUpdateUserPassword llama al RPC con id y contraseña', async () => {
-    const rpc = mockRpc({ data: null, error: null })
+  it('adminUpdateUserPassword invoca la Edge Function con action updatePassword', async () => {
+    const invoke = mockInvoke({ data: { ok: true } })
     await expect(adminUpdateUserPassword('user-2', 'nueva123')).resolves.toBeUndefined()
-    expect(rpc).toHaveBeenCalledWith('admin_update_user_password', { p_id: 'user-2', p_password: 'nueva123' })
+    expect(invoke).toHaveBeenCalledWith('admin-users', {
+      body: { action: 'updatePassword', id: 'user-2', password: 'nueva123' },
+    })
   })
 
-  it('adminSetUserBanned llama al RPC con id y estado', async () => {
-    const rpc = mockRpc({ data: null, error: null })
+  it('adminSetUserBanned invoca la Edge Function con action setBanned', async () => {
+    const invoke = mockInvoke({ data: { ok: true } })
     await expect(adminSetUserBanned('user-2', true)).resolves.toBeUndefined()
-    expect(rpc).toHaveBeenCalledWith('admin_set_user_banned', { p_id: 'user-2', p_banned: true })
+    expect(invoke).toHaveBeenCalledWith('admin-users', {
+      body: { action: 'setBanned', id: 'user-2', banned: true },
+    })
   })
 
-  it('adminDeleteUser llama al RPC con el id', async () => {
-    const rpc = mockRpc({ data: null, error: null })
+  it('adminDeleteUser invoca la Edge Function con action delete', async () => {
+    const invoke = mockInvoke({ data: { ok: true } })
     await expect(adminDeleteUser('user-2')).resolves.toBeUndefined()
-    expect(rpc).toHaveBeenCalledWith('admin_delete_user', { p_id: 'user-2' })
+    expect(invoke).toHaveBeenCalledWith('admin-users', {
+      body: { action: 'delete', id: 'user-2' },
+    })
   })
 })
