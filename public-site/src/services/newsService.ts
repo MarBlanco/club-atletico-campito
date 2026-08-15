@@ -12,7 +12,7 @@ export async function getLatestNews(limit = 3): Promise<News[]> {
     .limit(limit)
 
   if (error) throw error
-  return data
+  return data ?? []
 }
 
 export async function getPublishedNews(): Promise<News[]> {
@@ -23,7 +23,7 @@ export async function getPublishedNews(): Promise<News[]> {
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data
+  return data ?? []
 }
 
 export async function getPublishedNewsById(id: string): Promise<News | null> {
