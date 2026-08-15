@@ -3,6 +3,9 @@ import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
 import { uploadImage, uploadVideo } from '../services/storageService'
+import { optimizeImageFromFile } from '../lib/optimizeImage'
+import { generateThumbnailFromFile } from '../lib/thumbnail'
+import CropModal from '../components/media/CropModal'
 
 const TYPE_LABELS: Record<MediaType, string> = {
   image: 'Imagen',
@@ -29,6 +32,9 @@ function MultimediaPage() {
   const [saving, setSaving] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [cropBlob, setCropBlob] = useState<Blob | null>(null)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -44,6 +50,9 @@ function MultimediaPage() {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setFile(null)
+    setCropBlob(null)
+    setCropSrc(null)
+    setPreviewSrc(null)
     setShowForm(true)
   }
 
@@ -56,6 +65,9 @@ function MultimediaPage() {
       thumbnail_url: m.thumbnail_url,
     })
     setFile(null)
+    setCropBlob(null)
+    setCropSrc(null)
+    setPreviewSrc(null)
     setShowForm(true)
   }
 
@@ -64,6 +76,29 @@ function MultimediaPage() {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setFile(null)
+    setCropBlob(null)
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+    if (previewSrc) URL.revokeObjectURL(previewSrc)
+    setPreviewSrc(null)
+  }
+
+  function openCrop() {
+    if (!file) return
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(URL.createObjectURL(file))
+  }
+
+  function closeCrop() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+  }
+
+  function handleCropSave(blob: Blob) {
+    setCropBlob(blob)
+    if (previewSrc) URL.revokeObjectURL(previewSrc)
+    setPreviewSrc(URL.createObjectURL(blob))
+    closeCrop()
   }
 
   async function handleUpload() {
@@ -71,11 +106,24 @@ function MultimediaPage() {
     const targetType = form.type
     setUploading(true)
     try {
-      const { publicUrl } = targetType === 'video'
-        ? await uploadVideo(file, 'videos')
-        : await uploadImage(file, 'galleries')
-      setForm(p => (p.type === targetType ? { ...p, url: publicUrl } : p))
+      if (targetType === 'video') {
+        const { publicUrl } = await uploadVideo(file, 'videos')
+        setForm(p => (p.type === targetType ? { ...p, url: publicUrl } : p))
+      } else {
+        const source = cropBlob ?? file
+        const optimized = await optimizeImageFromFile(new File([source], 'image.jpg', { type: 'image/jpeg' }))
+        const extension = optimized.type === 'image/webp' ? 'webp' : 'jpg'
+        const optimizedFile = new File([optimized], `image.${extension}`, { type: optimized.type })
+        const { publicUrl } = await uploadImage(optimizedFile, 'galleries')
+        const thumb = await generateThumbnailFromFile(optimizedFile)
+        const thumbFile = new File([thumb], 'thumb.jpg', { type: thumb.type })
+        const thumbResult = await uploadImage(thumbFile, 'galleries')
+        setForm(p => (p.type === targetType ? { ...p, url: publicUrl, thumbnail_url: thumbResult.publicUrl } : p))
+      }
       setFile(null)
+      setCropBlob(null)
+      if (previewSrc) URL.revokeObjectURL(previewSrc)
+      setPreviewSrc(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al subir archivo')
@@ -156,9 +204,25 @@ function MultimediaPage() {
                     id="media-file"
                     type="file"
                     accept={form.type === 'video' ? 'video/*' : 'image/*'}
-                    onChange={e => setFile(e.target.files?.[0] ?? null)}
+                    onChange={e => {
+                      const next = e.target.files?.[0] ?? null
+                      setFile(next)
+                      setCropBlob(null)
+                      if (previewSrc) URL.revokeObjectURL(previewSrc)
+                      setPreviewSrc(next ? URL.createObjectURL(next) : null)
+                    }}
                     style={{ fontSize: 13, flex: 1 }}
                   />
+                  {form.type === 'image' && (
+                    <button
+                      type="button"
+                      onClick={openCrop}
+                      disabled={!file || uploading}
+                      style={btnStyle(file && !uploading ? '#3b82f6' : '#9ca3af')}
+                    >
+                      Recortar
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleUpload}
@@ -168,22 +232,22 @@ function MultimediaPage() {
                     {uploading ? 'Subiendo...' : 'Subir'}
                   </button>
                 </div>
-                {form.url && (
+                {(previewSrc || form.url) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {form.type === 'video' ? (
                       <video
-                        src={form.url}
+                        src={previewSrc ?? form.url}
                         controls
                         style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }}
                       />
                     ) : (
                       <img
-                        src={form.url}
+                        src={previewSrc ?? form.url}
                         alt="Preview"
                         style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }}
                       />
                     )}
-                    <span style={{ fontSize: 11, color: '#6b7280', wordBreak: 'break-all' }}>{form.url}</span>
+                    {form.url && <span style={{ fontSize: 11, color: '#6b7280', wordBreak: 'break-all' }}>{form.url}</span>}
                   </div>
                 )}
               </div>
@@ -263,6 +327,14 @@ function MultimediaPage() {
           </table>
           </div>
         </div>
+      )}
+
+      {cropSrc && (
+        <CropModal
+          src={cropSrc}
+          onCancel={closeCrop}
+          onSave={handleCropSave}
+        />
       )}
     </div>
   )
