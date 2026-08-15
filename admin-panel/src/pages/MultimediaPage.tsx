@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
+import { useAuth } from '../context/AuthContext'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
 import type { Gallery } from '../types/galleries'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
-import { getGalleries } from '../services/galleriesService'
+import { getGalleries, createGallery } from '../services/galleriesService'
 import ImageUploader from '../components/media/ImageUploader'
 import VideoUploader from '../components/media/VideoUploader'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
+import Modal from '../components/ui/Modal'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
@@ -38,6 +40,8 @@ const EMPTY_FORM: CreateMediaDTO = {
 
 function MultimediaPage() {
   const isMobile = useIsMobile()
+  const { role } = useAuth()
+  const isAdmin = role === 'admin'
   const [media, setMedia] = useState<Media[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,6 +53,10 @@ function MultimediaPage() {
   const [saving, setSaving] = useState(false)
   const [galleries, setGalleries] = useState<Gallery[]>([])
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [showGalleryModal, setShowGalleryModal] = useState(false)
+  const [galleryName, setGalleryName] = useState('')
+  const [gallerySaving, setGallerySaving] = useState(false)
+  const [galleryError, setGalleryError] = useState<string | null>(null)
 
   useEffect(() => {
     getMedia()
@@ -83,6 +91,36 @@ function MultimediaPage() {
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
+  }
+
+  function openGalleryModal() {
+    setGalleryName('')
+    setGalleryError(null)
+    setShowGalleryModal(true)
+  }
+
+  async function handleCreateGallery(e: React.FormEvent) {
+    e.preventDefault()
+    const title = galleryName.trim()
+    if (!title) return
+    setGallerySaving(true)
+    setGalleryError(null)
+    try {
+      const created = await createGallery({
+        title,
+        category: 'primera',
+        match_date: new Date().toISOString().slice(0, 10),
+        cover_image: '',
+      })
+      setGalleries(prev => [...prev, created])
+      setForm(p => ({ ...p, gallery_id: created.id }))
+      setShowGalleryModal(false)
+      setGalleryName('')
+    } catch (e: unknown) {
+      setGalleryError(e instanceof Error ? e.message : 'Error al crear la galería')
+    } finally {
+      setGallerySaving(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -149,6 +187,9 @@ function MultimediaPage() {
                 <option value="" disabled>Seleccionar galería</option>
                 {galleries.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
               </select>
+              {isAdmin && (
+                <button type="button" onClick={openGalleryModal} style={linkBtnStyle()}>+ Nueva galería</button>
+              )}
             </Field>
             <Field label="Archivo" htmlFor="media-file" style={{ gridColumn: '1 / -1' }}>
               {form.type === 'video' ? (
@@ -221,6 +262,23 @@ function MultimediaPage() {
         />
       )}
 
+      {showGalleryModal && (
+        <Modal title="Nueva galería" onClose={() => setShowGalleryModal(false)}>
+          <form onSubmit={handleCreateGallery} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Field label="Nombre de la galería" htmlFor="gallery-name">
+              <Input id="gallery-name" value={galleryName} onChange={e => setGalleryName(e.target.value)} autoFocus required />
+            </Field>
+            {galleryError && <p style={{ color: '#ef4444', fontSize: 13, margin: 0 }} role="alert">{galleryError}</p>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button type="button" onClick={() => setShowGalleryModal(false)} style={btnStyle('#6b7280')}>Cancelar</button>
+              <button type="submit" disabled={gallerySaving} style={btnStyle(gallerySaving ? '#9ca3af' : '#1a1a2e')}>
+                {gallerySaving ? 'Creando...' : 'Crear'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {confirmId && (
         <ConfirmDialog
           title="Eliminar archivo"
@@ -244,6 +302,10 @@ function Field({ label, htmlFor, children, style }: { label: string; htmlFor?: s
 
 function btnStyle(bg: string): React.CSSProperties {
   return { padding: '9px 18px', background: bg, color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }
+}
+
+function linkBtnStyle(): React.CSSProperties {
+  return { background: 'none', border: 'none', color: '#1d4ed8', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0, marginTop: 6, textAlign: 'left' }
 }
 
 export default MultimediaPage
