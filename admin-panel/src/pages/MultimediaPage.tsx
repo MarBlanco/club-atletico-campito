@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 import type { Media, CreateMediaDTO, UpdateMediaDTO, MediaType } from '../types/media'
+import type { Gallery } from '../types/galleries'
 import { getMedia, createMedia, updateMedia, deleteMedia } from '../services/mediaService'
+import { getGalleries } from '../services/galleriesService'
 import { uploadImage, uploadVideo } from '../services/storageService'
 
 const TYPE_LABELS: Record<MediaType, string> = {
@@ -27,6 +29,7 @@ function MultimediaPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateMediaDTO>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [galleries, setGalleries] = useState<Gallery[]>([])
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -36,6 +39,9 @@ function MultimediaPage() {
       .then(data => { setMedia(data); setError(null) })
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar multimedia'))
       .finally(() => setLoading(false))
+    getGalleries()
+      .then(setGalleries)
+      .catch(() => {})
   }, [refreshKey])
 
   function reload() { setRefreshKey(k => k + 1) }
@@ -138,15 +144,11 @@ function MultimediaPage() {
                 <option value="video">Video</option>
               </select>
             </Field>
-            <Field label="ID de galería" htmlFor="media-gallery">
-              <input
-                id="media-gallery"
-                value={form.gallery_id}
-                onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))}
-                required
-                placeholder="UUID de la galería"
-                style={inputStyle}
-              />
+            <Field label="Galería" htmlFor="media-gallery">
+              <select id="media-gallery" value={form.gallery_id} onChange={e => setForm(p => ({ ...p, gallery_id: e.target.value }))} required style={inputStyle}>
+                <option value="" disabled>Seleccionar galería</option>
+                {galleries.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+              </select>
             </Field>
             <Field label="Archivo" htmlFor="media-file" style={{ gridColumn: '1 / -1' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -250,7 +252,7 @@ function MultimediaPage() {
                   </td>
                   <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.url)}</td>
                   <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{m.thumbnail_url ? truncate(m.thumbnail_url) : '—'}</td>
-                  <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{truncate(m.gallery_id, 20)}</td>
+                  <td style={tdStyle}>{galleries.find(g => g.id === m.gallery_id)?.title ?? truncate(m.gallery_id, 20)}</td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button onClick={() => openEdit(m)} style={btnSmall('#3b82f6')}>Editar</button>
